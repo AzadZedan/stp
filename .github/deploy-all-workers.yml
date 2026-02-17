@@ -11,8 +11,10 @@ jobs:
   deploy-workers:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive  # ← أضف هذا السطر فقط
 
       - name: Deploy all Workers
         uses: cloudflare/wrangler-action@v3
@@ -20,5 +22,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         env:
-          # List all your Workers here
           WORKERS_TO_DEPLOY: "patient-shape-b537,stp,winter-frog-5d6c"
