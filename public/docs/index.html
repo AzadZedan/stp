@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توثيق واجهة برمجة التطبيقات - منصة ستامبكوين</title>
+    <meta name="description" content="توثيق تفصيلي لواجهة برمجة تطبيقات منصة ستامبكوين">
+    <meta name="keywords" content="ستامبكوين, API, توثيق, واجهة برمجة التطبيقات">
+
+    <!-- الأيقونات -->
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Custom Documentation CSS -->
+    <style>
+        .doc-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .doc-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .api-endpoint {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .method-get {
+            background-color: rgba(6, 165, 255, 0.1);
+            color: #0099ff;
+        }
+
+        .method-post {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .method-put {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .method-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.25rem;
+            color: #555;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .parameter {
+            margin-bottom: 1rem;
+        }
+
+        .parameter-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .parameter-type {
+            background-color: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        .response-example {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                position: relative;
+                height: auto;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-coins me-2"></i> توثيق API
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#overview">نظرة عامة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#endpoints">نقاط النهاية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#authentication">التصريح</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#examples">أمثلة</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container my-5">
+        <div class="row">
+            <!-- الشريط الجانبي -->
+            <div class="col-lg-3">
+                <div class="sidebar">
+                    <h5 class="mb-3">محتويات التوثيق</h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="#overview">نظرة عامة</a>
+                        <a class="nav-link" href="#authentication">التصريح</a>
+                        <a class="nav-link" href="#endpoints">نقاط النهاية</a>
+                        <a class="nav-link" href="#status">نقاط النهاية - الحالة</a>
+                        <a class="nav-link" href="#transactions">نقاط النهاية - المعاملات</a>
+                        <a class="nav-link" href="#examples">أمثلة</a>
+                        <a class="nav-link" href="#errors">أخطاء API</a>
+                        <a class="nav-link" href="#support">الدعم</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- المحتوى الرئيسي -->
+            <div class="col-lg-9">
+                <!-- نظرة عامة -->
+                <section id="overview" class="doc-section">
+                    <h2>نظرة عامة</h2>
+                    <p>توفر منصة ستامبكوين واجهة برمجة تطبيقات (API) متكاملة تتيح للمطورين التكامل مع منصة المعاملات الرقمية. توفر API الوصول إلى جميع وظائف المنصة، بما في ذلك إنشاء المعاملات، والتحقق من حالتها، وإدارة المحفظة.</p>
+
+                    <h3>معلومات API</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>الميزة</th>
+                                    <th>الوصف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>الإصدار</td>
+                                    <td>v2.0.0</td>
+                                </tr>
+                                <tr>
+                                    <td>النوع</td>
+                                    <td>RESTful</td>
+                                </tr>
+                                <tr>
+                                    <td>تنسيق البيانات</td>
+                                    <td>JSON</td>
+                                </tr>
+                                <tr>
+                                    <td>معدل الطلبات</td>
+                                    <td>100 طلب/دقيقة</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- التصريح -->
+                <section id="authentication" class="doc-section">
+                    <h2>التصريح</h2>
+                    <p>للوصول إلى API، يجب تضمين رمز وصول (API Key) في رأس الطلب. يمكن الحصول على رمز الوصول من لوحة تحكم المستخدم.</p>
+
+                    <h3>كيفية استخدام رمز الوصول</h3>
+                    <p>يجب تضمين رمز الوصول في رأس الطلب باسم <code>X-API-Key</code>:</p>
+
+                    <div class="response-example">
+                        <pre><code>curl -H "X-API-Key: YOUR_API_KEY"      -H "Content-Type: application/json"      -X POST https://api.ecostamp.net/api/transaction      -d '{"amount": 100, "currency": "STAMP", "recipient": "user123"}'</code></pre>
+                    </div>
+
+                    <h3>نطاق الصلاحيات</h3>
+                    <p>يتم منح رموز الوصول بمستويات صلاحيات مختلفة حسب نوع الحساب:</p>
+                    <ul>
+                        <li><strong>مستخدم عادي:</strong> إنشاء المعاملات فقط</li>
+                        <li><strong>مؤسسة:</strong> إنشاء المعاملات والتحقق من حالتها</li>
+                        <li><strong>مسؤول:</strong> جميع الوظائف</li>
+                    </ul>
+                </section>
+
+                <!-- نقاط النهاية -->
+                <section id="endpoints" class="doc-section">
+                    <h2>نقاط النهاية</h2>
+                    <p>توفر منصة ستامبكوين مجموعة من نقاط النهاية التي تتيح إدارة المعاملات والوصول إلى المعلومات.</p>
+
+                    <!-- نقاط النهاية - الحالة -->
+                    <section id="status" class="mt-4">
+                        <h3>نقاط النهاية - الحالة</h3>
+
+                        <div class="api-endpoint">
+                            <h4>الحصول على حالة الخادم</h4>
+                            <p class="mb-3"><span class="method method-get">GET</span> <code>/api/status</code></p>
+                            <p>يحصل على حالة الخادم الحالية.</p>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "status": "running",
+  "timestamp": "2023-05-15T12:34:56.789Z",
+  "version": "2.0.0",
+  "uptime": 12345
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4>التحقق من صحة النظام</h4>
+                            <p class="mb-3"><span class="method method-get">GET</span> <code>/api/health</code></p>
+                            <p>يحصل على صحة النظام واتصاله بقاعدة البيانات.</p>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "status": "healthy",
+  "timestamp": "2023-05-15T12:34:56.789Z",
+  "database": "connected"
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- نقاط النهاية - المعاملات -->
+                    <section id="transactions" class="mt-4">
+                        <h3>نقاط النهاية - المعاملات</h3>
+
+                        <div class="api-endpoint">
+                            <h4>إنشاء معاملة جديدة</h4>
+                            <p class="mb-3"><span class="method method-post">POST</span> <code>/api/transaction</code></p>
+                            <p>ينشئ معاملة جديدة في النظام.</p>
+
+                            <h5>البارامترات</h5>
+                            <div class="parameter">
+                                <span class="parameter-type">رقم</span>
+                                <span class="parameter-name">amount</span>
+                                <span>المبلغ المرسل (مطلوب)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">currency</span>
+                                <span>رمز العملة (مطلوب)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">recipient</span>
+                                <span>معرف المستلم (مطلوب)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">sender</span>
+                                <span>معرف المرسل (مطلوب)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">reference</span>
+                                <span>مرجع اختياري</span>
+                            </div>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "transaction": {
+    "id": "TX123456789",
+    "amount": 100,
+    "currency": "STAMP",
+    "recipient": "user123",
+    "sender": "user456",
+    "status": "pending",
+    "timestamp": "2023-05-15T12:34:56.789Z",
+    "reference": "REF123"
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4>الحصول على قائمة المعاملات</h4>
+                            <p class="mb-3"><span class="method method-get">GET</span> <code>/api/transactions</code></p>
+                            <p>يحصل على قائمة بالمعاملات مع التصفية والترقيم.</p>
+
+                            <h5>بارامترات الاستعلام</h5>
+                            <div class="parameter">
+                                <span class="parameter-type">رقم</span>
+                                <span class="parameter-name">limit</span>
+                                <span>الحد الأقصى للنتائج (الافتراضي: 10)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">رقم</span>
+                                <span class="parameter-name">offset</span>
+                                <span>الإزاحة (الافتراضي: 0)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">status</span>
+                                <span>تصفية بالحالة</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">currency</span>
+                                <span>تصفيرة بالعملة</span>
+                            </div>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "transactions": [
+    {
+      "id": "TX123456789",
+      "amount": 100,
+      "currency": "STAMP",
+      "recipient": "user123",
+      "sender": "user456",
+      "status": "confirmed",
+      "timestamp": "2023-05-15T12:34:56.789Z"
+    },
+    {
+      "id": "TX987654321",
+      "amount": 50,
+      "currency": "USD",
+      "recipient": "user789",
+      "sender": "user456",
+      "status": "pending",
+      "timestamp": "2023-05-14T10:20:30.123Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4>الحصول على تفاصيل معاملة</h4>
+                            <p class="mb-3"><span class="method method-get">GET</span> <code>/api/transactions/:id</code></p>
+                            <p>يحصل على تفاصيل معاملة محددة باستخدام معرفها.</p>
+
+                            <h5>بارامترات المسار</h5>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">id</span>
+                                <span>معرف المعاملة (مطلوب)</span>
+                            </div>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "transaction": {
+    "id": "TX123456789",
+    "amount": 100,
+    "currency": "STAMP",
+    "recipient": "user123",
+    "sender": "user456",
+    "status": "confirmed",
+    "timestamp": "2023-05-15T12:34:56.789Z",
+    "reference": "REF123",
+    "details": {
+      "confirmations": 6,
+      "created_at": "2023-05-15T12:34:56.789Z",
+      "confirmed_at": "2023-05-15T12:35:12.345Z"
+    }
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4>تحديث حالة معاملة</h4>
+                            <p class="mb-3"><span class="method method-put">PUT</span> <code>/api/transactions/:id/status</code></p>
+                            <p>يحدث حالة معاملة محددة.</p>
+
+                            <h5>بارامترات المسار</h5>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">id</span>
+                                <span>معرف المعاملة (مطلوب)</span>
+                            </div>
+
+                            <h5>بارامترات الطلب</h5>
+                            <div class="parameter">
+                                <span class="parameter-type">نص</span>
+                                <span class="parameter-name">status</span>
+                                <span>الحالة الجديدة (مطلوب)</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="parameter-type">كائن</span>
+                                <span class="parameter-name">details</span>
+                                <span>تفاصيل إضافية اختيارية</span>
+                            </div>
+
+                            <h5>الاستجابة الناجحة</h5>
+                            <div class="response-example">
+                                <pre><code>{
+  "success": true,
+  "transaction": {
+    "id": "TX123456789",
+    "amount": 100,
+    "currency": "STAMP",
+    "recipient": "user123",
+    "sender": "user456",
+    "status": "confirmed",
+    "timestamp": "2023-05-15T12:34:56.789Z",
+    "details": {
+      "confirmations": 6,
+      "created_at": "2023-05-15T12:34:56.789Z",
+      "confirmed_at": "2023-05-15T12:35:12.345Z"
+    }
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <!-- أمثلة -->
+                <section id="examples" class="doc-section">
+                    <h2>أمثلة</h2>
+
+                    <h3>إنشاء معاملة باستخدام cURL</h3>
+                    <div class="response-example">
+                        <pre><code>curl -X POST https://api.ecostamp.net/api/transaction      -H "Content-Type: application/json"      -H "X-API-Key: YOUR_API_KEY"      -d '{
+       "amount": 100,
+       "currency": "STAMP",
+       "recipient": "user123",
+       "sender": "user456",
+       "reference": "REF123"
+     }'</code></pre>
+                    </div>
+
+                    <h3>الحصول على قائمة المعاملات باستخدام JavaScript</h3>
+                    <div class="response-example">
+                        <pre><code>const response = await fetch('https://api.ecostamp.net/api/transactions', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'YOUR_API_KEY'
+  }
+});
+
+const data = await response.json();
+if (data.success) {
+  console.log('Transactions:', data.transactions);
+} else {
+  console.error('Error:', data.error);
+}</code></pre>
+                    </div>
+
+                    <h3>تحديث حالة معاملة باستخدام Python</h3>
+                    <div class="response-example">
+                        <pre><code>import requests
+
+url = 'https://api.ecostamp.net/api/transactions/TX123456789/status'
+headers = {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'YOUR_API_KEY'
+}
+data = {
+    'status': 'confirmed',
+    'details': {
+        'confirmations': 6,
+        'confirmed_at': '2023-05-15T12:35:12.345Z'
+    }
+}
+
+response = requests.put(url, json=data, headers=headers)
+result = response.json()
+
+if result['success']:
+    print('Transaction updated successfully')
+else:
+    print('Error:', result['error'])</code></pre>
+                    </div>
+                </section>
+
+                <!-- أخطاء API -->
+                <section id="errors" class="doc-section">
+                    <h2>أخطاء API</h2>
+                    <p>عندما يفشل الطلب، يعيد API كائن خطأ يحتوي على معلومات حول المشكلة.</p>
+
+                    <h3>هيكل الخطأ</h3>
+                    <div class="response-example">
+                        <pre><code>{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error description",
+    "details": "Additional error details"
+  },
+  "timestamp": "2023-05-15T12:34:56.789Z"
+}</code></pre>
+                    </div>
+
+                    <h3>أخطاء شائعة</h3>
+                    <div class="api-endpoint">
+                        <h4>خطأ في المصادقة</h4>
+                        <p><strong>الرمز:</strong> AUTH_ERROR</p>
+                        <p><strong>الحالة:</strong> 401 Unauthorized</p>
+                        <p><strong>الوصف:</strong> رمز الوصول غير صالح أو منتهي الصلاحية</p>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>صلاحيات غير كافية</h4>
+                        <p><strong>الرمز:</strong> INSUFFICIENT_PERMISSIONS</p>
+                        <p><strong>الحالة:</strong> 403 Forbidden</p>
+                        <p><strong>الوصف:</strong> ليس لديك الصلاحية لإجراء هذا الطلب</p>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>معاملات غير صالحة</h4>
+                        <p><strong>الرمز:</strong> INVALID_PARAMETERS</p>
+                        <p><strong>الحالة:</strong> 400 Bad Request</p>
+                        <p><strong>الوصف:</strong> أحد بارامترات الطلب غير صالح</p>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>المعاملة غير موجودة</h4>
+                        <p><strong>الرمز:</strong> TRANSACTION_NOT_FOUND</p>
+                        <p><strong>الحالة:</strong> 404 Not Found</p>
+                        <p><strong>الوصف:</strong> المعاملة المطلوبة غير موجودة</p>
+                    </div>
+                </section>
+
+                <!-- الدعم -->
+                <section id="support" class="doc-section">
+                    <h2>الدعم</h2>
+                    <p>إذا واجهت أي مشاكل أو كان لديك أسئلة حول API، يمكنك التواصل مع فريق الدعم لدينا:</p>
+
+                    <ul>
+                        <li><strong>البريد الإلكتروني:</strong> <a href="mailto:api-support@ecostamp.net">api-support@ecostamp.net</a></li>
+                        <li><strong>الدردشة المباشرة:</a> متاحة في لوحة تحكم المستخدم</li>
+                        <li><strong>توثيق إضافي:</a> <a href="#">مركز المطورين</a></li>
+                        <li><strong>تتبع المشاكل:</a> <a href="#">GitHub Issues</a></li>
+                    </ul>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        نحن نعمل باستمرار على تحسين API. تابع <a href="#">ملاحظات الإصدار</a> لأحدث التحديثات والتغييرات.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Prism.js for code highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="../js/app.js"></script>
+
+    <!-- Documentation JS -->
+    <script>
+        // تفعيل التنقل السلس
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // تحديث النشاط في الشريط الجانبي
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

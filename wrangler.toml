@@ -1,0 +1,55 @@
+# اسم التطبيق
+name = "stampcoin-platform"
+
+# نوع التطبيق
+type = "javascript"
+
+# معرف حساب Cloudflare
+account_id = "652e53f35781522e2745784cc4425d9d"
+
+# معرف المشروع
+project_name = "stampcoin-platform"
+
+# وضع التطوير
+workers_dev = true
+
+# مسارات التطبيق
+route = "ecostamp.net/*"
+
+# إعدادات البناء
+compatibility_date = "2023-05-15"
+
+# إعدادات Pages
+[build]
+command = "npm run build"
+[build.upload]
+directory = "public"
+
+[env.production]
+pages_build_output_dir = "public"
+
+[env.staging]
+pages_build_output_dir = "public"
+
+# متغيرات البيئة
+[env.production.vars]
+ENV = "production"
+API_BASE_URL = "https://api.ecostamp.net"
+NODE_ENV = "production"
+
+[env.staging.vars]
+ENV = "staging"
+API_BASE_URL = "https://staging.api.ecostamp.net"
+NODE_ENV = "staging"
+
+# إعدادات التخزين
+[[kv_namespaces]]
+binding = "STAMPCOIN_KV"
+id = "YOUR_KV_NAMESPACE_ID"
+preview_id = "YOUR_KV_PREVIEW_ID"
+
+# إعدatabases
+[[d1_databases]]
+binding = "STAMPCOIN_DB"
+database_name = "stampcoin_platform"
+database_id = "YOUR_DATABASE_ID"
