@@ -1,3 +1,6 @@
 [submodule "git"]
     path = git
     url = https://github.com/zedanazad43/stp
+[submodule "stampcoin-platform"]
+    path = stampcoin-platform
+    url = https://github.com/zedanazad43/stampcoin-platform
