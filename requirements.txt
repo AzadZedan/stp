@@ -1,9 +1,2 @@
-# Python dependencies for Stampcoin Platform
-# Required for utils.py and ML/data processing functionality
-
-# Core scientific computing
-numpy>=1.21.0
-torch>=1.9.0
-
-# Note: utils.py also uses standard library modules (gzip, json, logging, itertools)
-# which are included with Python and require no installation
+# اعتماديات Python لمشروع Stampcoin
+# أضف مكتباتك المطلوبة هنا
