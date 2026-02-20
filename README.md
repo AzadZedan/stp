@@ -1,11 +1,13 @@
 <<<<<<< HEAD
-# 🏛️ Stampcoin Platform | منصة ستامب كوين
+# 🏛️ Stampcoin Platform | منصة ستامب كوين | Stampcoin Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](Dockerfile)
 
-An innovative blockchain-based digital stamps platform with wallet and marketplace features.
+منصة مبتكرة للطوابع الرقمية القائمة على البلوك تشين مع ميزات المحفظة والسوق.
+
+An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
 
 🌐 **[Live Demo](https://zedanazad43.github.io/stp/)** | 📖 **[Documentation](docs/)** | 🛣️ **[Roadmap](docs/roadmap.html)**
 =======
@@ -17,27 +19,35 @@ An innovative blockchain-based digital stamps platform with wallet and marketpla
 An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
 
 <<<<<<< HEAD
-## 🌍 Languages | اللغات
+## 🌍 Languages | اللغات | Sprachen
 
-- **العربية** 🇸🇦 | **English** 🇬🇧 | **Deutsch** 🇩🇪 | **中文** 🇨🇳 | **Français** 🇫🇷 | **Español** 🇪🇸
+- **العربية** 🇸🇦 | **English** 🇬🇧 | **Deutsch** 🇩🇪
 
 ---
 
-## ✨ Features | المميزات
+## ✨ Features | المميزات | Features
 
 - 🏦 **Digital Wallet API** - Create, manage, and transfer digital stamps securely
 - 🛍️ **Market Institution API** - Buy, sell, and trade digital stamps in a marketplace
 - 🔐 **Secure P2P Transfers** - Peer-to-peer transactions with full transaction history
-- 🌐 **Multi-Language Support** - 6+ languages supported
+- 🌐 **Multi-Language Support** - 3+ languages supported
 - 🐳 **Docker Ready** - Full Docker and Docker Compose support
 - ⚡ **High Performance** - Built with Express.js and Node.js
+- 💳 **Digital Wallet**: Secure storage for your digital stamps and tokens
+- 🔒 **Secure Transfers**: Blockchain-powered peer-to-peer transactions
+- 🛍️ **Marketplace**: Buy, sell, and trade digital collectibles
+- 👤 **User Profiles**: Verified accounts with complete profile management
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start | البدء السريع | Schnellstart
 
-### Prerequisites
-- Node.js >= 16.x
+### Prerequisites | المتطلبات الأساسية | Voraussetzungen
+
+- Node.js (v18 or higher)
+- MongoDB
+- Git
+- Docker (optional, recommended)
 =======
 ## Features
 
@@ -57,7 +67,7 @@ An innovative blockchain-based platform for digital stamps, rewards, and loyalty
 - Docker (optional, recommended)
 
 <<<<<<< HEAD
-### Using Docker (Recommended)
+### Using Docker (Recommended) | استخدام Docker (موصى به) | Docker verwenden (empfohlen)
 
 ```bash
 # Clone repository
@@ -70,7 +80,7 @@ docker compose up --build
 # Access at http://localhost:8080
 ```
 
-### Local Development
+### Local Development | التطوير المحلي | Lokale Entwicklung
 
 ```bash
 # Install dependencies
@@ -84,7 +94,7 @@ npm run dev
 
 ---
 
-## 📦 Installation & Setup
+## 📦 Installation & Setup | التثبيت والإعداد | Installation & Einrichtung
 
 See detailed guides:
 - **[Installation Guide](INSTALLATION.md)**
@@ -93,17 +103,17 @@ See detailed guides:
 
 ---
 
-## 🔌 API Documentation
+## 🔌 API Documentation | وثائق API | API-Dokumentation
 
-### Wallet API | واجهة برمجة المحفظة
+### Wallet API | واجهة برمجة المحفظة | Wallet API
 Complete wallet management endpoints and examples: **[WALLET_API.md](WALLET_API.md)**
 
-### Market API | واجهة برمجة السوق
+### Market API | واجهة برمجة السوق | Markt API
 Complete marketplace endpoints and examples: **[MARKET_API.md](MARKET_API.md)**
 
 ---
 
-## 🛠️ Development
+## 🛠️ Development | التطوير | Entwicklung
 
 ```bash
 # Install dependencies
@@ -125,7 +135,7 @@ npm test
 npm lint
 ```
 
-### Docker Commands
+### Docker Commands | أوامر Docker | Docker-Befehle
 
 ```bash
 # Build Docker image
@@ -141,7 +151,7 @@ docker compose down
 
 ---
 
-## 📚 Full Documentation
+## 📚 Full Documentation | التوثيق الكامل | Vollständige Dokumentation
 
 - 🌐 **[Online Documentation Portal](https://zedanazad43.github.io/stp/)**
 - 📁 **[docs/ Directory](docs/)**
@@ -151,7 +161,7 @@ docker compose down
 
 ---
 
-## 🔒 Security
+## 🔒 Security | الأمان | Sicherheit
 
 For security information and guidelines, see **[SECURITY.md](SECURITY.md)**.
 
@@ -159,19 +169,19 @@ For security information and guidelines, see **[SECURITY.md](SECURITY.md)**.
 
 ---
 
-## 📝 License
+## 📝 License | الترخيص | Lizenz
 
 This project is licensed under the MIT License - see **[LICENSE](LICENSE)** for details.
 
 ---
 
-## 👥 Contributing
+## 👥 Contributing | المساهمة | Beitrag
 
 Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for guidelines.
 
 ---
 
-## 📧 Contact & Support
+## 📧 Contact & Support | الاتصال والدعم | Kontakt & Support
 
 - **Author**: Azad Zedan
 - **Repository**: [github.com/zedanazad43/stp](https://github.com/zedanazad43/stp)
@@ -179,13 +189,13 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for guidel
 
 ---
 
-## 🌐 Website
+## 🌐 Website | الموقع الإلكتروني | Website
 
 **Live Website**: https://zedanazad43.github.io/stp/
 
 ---
 
-## Changelog
+## Changelog | سجل التغييرات | Änderungsverlauf
 
 See **[CHANGELOG.md](CHANGELOG.md)** for version history and updates.
 
@@ -196,83 +206,9 @@ See **[CHANGELOG.md](CHANGELOG.md)** for version history and updates.
 
 ---
 
-## 🤖 إعداد GitHub Actions Runner ونشر المشروع
+---
 
-هذا المشروع يدعم استخدام GitHub Actions Runner المضيف الذاتي (Self-hosted Runner) لبناء ونشر المشروع تلقائيًا.
 
-### المتطلبات الأساسية
-- حساب GitHub
-- وصول إلى مستودع المشروع
-- نظام التشغيل Windows (مع PowerShell)
-
-### إعداد Runner المضيف الذاتي
-
-#### الخطوة 1: تنزيل GitHub Actions Runner
-
-1. افتح PowerShell
-2. أنشئ مجلدًا للـ Runner:
-   ```
-   mkdir actions-runner
-   cd actions-runner
-   ```
-3. قم بتنزيل Runner (نسخة Windows):
-   ```
-   curl -o actions-runner-win-x64-2.331.0.zip -L https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-win-x64-2.331.0.zip
-   ```
-4. قم بفك ضغط الملف:
-   ```
-   Expand-Archive -Path actions-runner-win-x64-2.331.0.zip -DestinationPath .
-   ```
-
-#### الخطوة 2: الحصول على عنوان URL ورمز Runner
-
-1. سجل الدخول إلى حساب GitHub الخاص بك
-2. اذهب إلى مستودعك
-3. من القمة اليمنى، انقر على 'Settings'
-4. في القمة اليسرى، انقر على 'Actions'
-5. في القمة اليسرى، انقر على 'Runners'
-6. انقر على زر 'New runner'
-7. انسخ عنوان URL ورمز Runner الظاهرين لك
-
-#### الخطوة 3: تكوين الـ Runner
-
-1. في PowerShell، انتقل إلى مجلد الـ Runner:
-   ```
-   cd C:\Users\azadz\actions-runner
-   ```
-2. قم بتكوين الـ Runner باستخدام عنوان URL ورمزك:
-   ```
-   .\config.cmd --url YOUR_REPO_URL --token YOUR_RUNNER_TOKEN
-   ```
-   استبدل `YOUR_REPO_URL` و`YOUR_RUNNER_TOKEN` بالقيم الفعلية
-
-#### الخطوة 4: تشغيل الـ Runner
-
-1. بعد التكوين بنجاح، قم بتشغيل الـ Runner:
-   ```
-   .\run.cmd
-   ```
-
-### إعداد سير العمل (Workflow) لنشر المشروع
-
-لقد قمنا مسبقًا بإنشاء ملف سير العمل في `.github/workflows/publish.yml`. هذا الملف يقوم بالآتي:
-
-1. يستنسخ المستودع عند كل دفع إلى الفرع الرئيسي
-2. يثبت Node.js والتبعيات
-3. يقوم ببناء المشروع
-4. ينشر المشروع
-
-لتخصيص سير العمل حسب احتياجاتك، قم بتعديل قسم "Deploy project" في ملف `publish.yml`.
-
-### نشر المشروع
-
-بعد إعداد Runner وتكوين سير العمل، سيتم نشر المشروع تلقائيًا عند كل دفع إلى الفرع الرئيسي. يمكنك مراقبة سير العمل في قسم "Actions" في مستودعك على GitHub.
-
-### استكشاف الأخطاء وإصلاحها
-
-- إذا لم يبدأ الـ Runner، تحقق من وجود رسائل خطأ في نافذة PowerShell
-- تأكد من أن عنوان URL ورمز Runner صحيحان وغير منتهي الصلاحية
-- تأكد من أن الـ Runner لديه الأذونات الكافية للوصول إلى ملفات المشروع
 =======
 ### Installation
 
