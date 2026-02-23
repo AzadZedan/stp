@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-02-23T16:39:18.678Z",
+  "mergedFiles": [
+    "artifacts/merged/extensions/bat.merged.txt",
+    "artifacts/merged/extensions/cjs.merged.txt",
+    "artifacts/merged/extensions/css.merged.txt",
+    "artifacts/merged/extensions/hcl.merged.txt",
+    "artifacts/merged/extensions/html.merged.txt",
+    "artifacts/merged/extensions/js.merged.txt",
+    "artifacts/merged/extensions/json.merged.txt",
+    "artifacts/merged/extensions/md.merged.txt",
+    "artifacts/merged/extensions/ps1.merged.txt",
+    "artifacts/merged/extensions/py.merged.txt",
+    "artifacts/merged/extensions/sh.merged.txt",
+    "artifacts/merged/extensions/tf.merged.txt",
+    "artifacts/merged/extensions/toml.merged.txt",
+    "artifacts/merged/extensions/ts.merged.txt",
+    "artifacts/merged/extensions/txt.merged.txt",
+    "artifacts/merged/extensions/yaml.merged.txt",
+    "artifacts/merged/extensions/yml.merged.txt",
+    "artifacts/merged/extensions/noext.merged.txt"
+  ],
+  "totalFiles": 292,
+  "byExtension": [
+    {
+      "extension": ".md",
+      "count": 121
+    },
+    {
+      "extension": ".yml",
+      "count": 32
+    },
+    {
+      "extension": ".json",
+      "count": 30
+    },
+    {
+      "extension": ".js",
+      "count": 25
+    },
+    {
+      "extension": "[noext]",
+      "count": 22
+    },
+    {
+      "extension": ".ps1",
+      "count": 13
+    },
+    {
+      "extension": ".sh",
+      "count": 12
+    },
+    {
+      "extension": ".txt",
+      "count": 11
+    },
+    {
+      "extension": ".yaml",
+      "count": 6
+    },
+    {
+      "extension": ".toml",
+      "count": 5
+    },
+    {
+      "extension": ".html",
+      "count": 4
+    },
+    {
+      "extension": ".py",
+      "count": 3
+    },
+    {
+      "extension": ".ts",
+      "count": 2
+    },
+    {
+      "extension": ".hcl",
+      "count": 2
+    },
+    {
+      "extension": ".tf",
+      "count": 1
+    },
+    {
+      "extension": ".css",
+      "count": 1
+    },
+    {
+      "extension": ".cjs",
+      "count": 1
+    },
+    {
+      "extension": ".bat",
+      "count": 1
+    }
+  ]
+}

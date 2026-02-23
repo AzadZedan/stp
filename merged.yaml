@@ -1,15 +1,2 @@
-# Merged YAML Files
-
-# mcp.yaml
-...existing content...
-
-# render.yaml
-...existing content...
-
-# stampcoin-platform\mcp.yaml
-...existing content...
-
-# stampcoin-platform\codeql.yaml
-...existing content...
-
-# End of merged YAML files.
+merged_bundle: artifacts/merged/extensions/yaml.merged.txt
+command: npm run merge:repo

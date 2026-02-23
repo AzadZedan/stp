@@ -1,0 +1,1106 @@
+# Merged extension: .sh
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 12
+
+
+
+===== FILE: fix_repo.sh =====
+#!/bin/bash
+
+# 1. الانتقال إلى مجلد المشروع (تأكد من أنك في المسار الصحيح)
+# cd path/to/your/stp-repo 
+
+echo "=== بدء عملية مراجعة وتحديث المستودع ==="
+
+# 2. التأكد من وجود المجلدات الأساسية وإنشاؤها إذا لم تكن موجودة
+echo "- التحقق من بنية المجلدات..."
+mkdir -p .github/workflows
+mkdir -p .vscode
+mkdir -p docs/architecture
+mkdir -p docs/api
+mkdir -p src/main/java
+mkdir -p src/main/resources
+mkdir -p src/test/java
+
+# 3. تحديث ملف .gitignore (لفلترة الملفات غير المرغوبة)
+echo "- تحديث ملف .gitignore..."
+cat > .gitignore <<EOF
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Virtual machine crash logs
+hs_err_pid*
+replay_pid*
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+!.vscode/settings.json      # <-- استثناء: نريد تتبع إعدادات المحرر
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+logs/
+*.log
+EOF
+
+# 4. إنشاء/تحديث ملف .vscode/settings.json
+echo "- تحديث إعدادات GitLens والمحرر..."
+cat > .vscode/settings.json <<EOF
+{
+    "gitlens.advanced.messages": {
+        "suppressShowKeyBindingsNotice": true
+    },
+    "gitlens.views.repositories.files.layout": "list",
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/target": true,
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    }
+}
+EOF
+
+# 5. إنشاء ملف .vscode/extensions.json (لإقتراح الامتدادات المطلوبة)
+echo "- إنشاء قائمة الامتدادات المقترحة..."
+cat > .vscode/extensions.json <<EOF
+{
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-xml"
+    ]
+}
+EOF
+
+# 6. تحديث CHANGELOG.md
+echo "- تحديث سجل التغييرات..."
+cat > CHANGELOG.md <<EOF
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Initial project structure setup.
+- CI/CD pipeline configuration.
+- Documentation folder for graphs and architecture.
+- Standard .gitignore for Java/Maven/Gradle projects.
+- VS Code settings and extensions recommendations.
+
+### Changed
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Fixed
+- N/A
+
+### Security
+- N/A
+EOF
+
+# 7. تحديث README.md
+echo "- تحديث ملف README.md..."
+cat > README.md <<EOF
+# STP Project Repository
+
+This repository contains the source code, documentation, and deployment configurations for the STP project.
+
+## 📂 Structure
+
+- \`src/\`: Source code (Main and Test).
+- \`docs/\`: Architecture diagrams and API docs.
+- \`.github/workflows/\`: CI/CD pipelines.
+- \`CHANGELOG.md\`: History of changes.
+
+## 🚀 Setup
+
+1. Clone the repository.
+2. Open in VS Code (recommended extensions will be suggested).
+3. Install dependencies (Maven/Gradle).
+
+## 📦 Deployment
+
+Deployment is handled automatically via GitHub Actions upon pushing to the \`main\` branch.
+EOF
+
+# 8. تحديث سير العمل (GitHub Actions)
+echo "- تحديث ملف سير العمل (CI/CD)..."
+cat > .github/workflows/deploy.yml <<EOF
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: stp-artifact
+        path: target/*.jar
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Deploy to Production
+      run: |
+        echo "Deploying to production server..."
+        # Add deployment commands here
+EOF
+
+# 9. إنشاء ملف pom.xml افتراضي (إذا لم يكن موجوداً لمنع حدوث خطأ في الـ Build)
+if [ ! -f "pom.xml" ]; then
+  echo "- إنشاء ملف pom.xml افتراضي..."
+  cat > pom.xml <<EOF
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>stp-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>STP Project</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+EOF
+fi
+
+# 10. إضافة جميع الملفات إلى Git (Add)
+echo "- جاري إضافة جميع الملفات المحدثة إلى Git..."
+git add .
+
+# 11. حفظ التغييرات (Commit)
+echo "- جاري حفظ التغييرات (Commit)..."
+git commit -m "chore: تحديث البنية الكاملة للمستودع وإضافة الملفات الناقصة (GitLens, CI/CD, Docs)"
+
+# 12. الرفع (Push) - (اختياري، قم بإلغاء التعليق إذا كنت تريد الرفع فوراً)
+# git push origin main
+
+echo "=== تم الانتهاء! المستودع الآن محدث ومنظم بالكامل ==="
+
+
+===== FILE: fix-sarif.sh =====
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   ./fix-sarif.sh /path/to/input.sarif [/path/to/output.sarif]
+# Defaults:
+#   input: ./results/javascript.sarif
+#   output: same name with .fixed.sarif suffix
+
+INPUT="${1:-./results/javascript.sarif}"
+OUTPUT="${2:-${INPUT%.sarif}.fixed.sarif}"
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Error: jq is required but not installed." >&2
+  exit 2
+fi
+
+if [ ! -f "$INPUT" ]; then
+  echo "Error: input file not found: $INPUT" >&2
+  exit 3
+fi
+
+# Recursively walk the JSON and normalize all string values:
+# - Replace backslashes with forward slashes
+# - Remove leading drive letter patterns like "C:/" or "D:/"
+jq '
+  def normalize_string:
+    (gsub("\\\\+"; "/") | sub("^[A-Za-z]:/"; ""));
+
+  def fix:
+    if type == "object" then
+      with_entries(.value |= fix)
+    elif type == "array" then
+      map(fix)
+    elif type == "string" then
+      normalize_string
+    else .
+    end;
+
+  fix
+' "$INPUT" > "$OUTPUT"
+
+# Quick verification
+if jq -e . "$OUTPUT" >/dev/null 2>&1; then
+  echo "Normalized SARIF written to: $OUTPUT"
+else
+  echo "Error: produced invalid JSON for $OUTPUT" >&2
+  exit 4
+fi
+
+
+===== FILE: merged.sh =====
+# Merged shell output has moved.
+# Use artifacts/merged/extensions/sh.merged.txt
+
+
+===== FILE: render-startup.sh =====
+#!/bin/sh
+
+# Render startup script for Stampcoin Platform
+
+# Set environment variables
+export NODE_ENV=production
+export PORT=8080
+export HOST=0.0.0.0
+export RENDER_OUTBOUND_IPS="74.220.48.0/24 74.220.56.0/24"
+
+# Log environment variables for debugging
+echo "Starting with environment:"
+echo "NODE_ENV=$NODE_ENV"
+echo "PORT=$PORT"
+echo "HOST=$HOST"
+echo "RENDER_OUTBOUND_IPS=$RENDER_OUTBOUND_IPS"
+
+# Start the application
+echo "Starting Stampcoin Platform..."
+node server.js
+
+
+===== FILE: scripts/generate-landing-page.sh =====
+#!/bin/bash
+set -euo pipefail
+
+# Script to generate the static landing page HTML
+# Usage: bash scripts/generate-landing-page.sh <output_directory>
+
+OUTPUT_DIR="${1:-.}"
+
+# Create the output directory if it doesn't exist
+mkdir -p "$OUTPUT_DIR"
+
+# Generate index.html
+cat > "$OUTPUT_DIR/index.html" << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .languages {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Stampcoin Platform</h1>
+        <p class="subtitle">منصة رقمية | Digital Platform | Digitale Plattform</p>
+        
+        <p class="description">
+            An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
+            Secure peer-to-peer transfers and a marketplace for digital collectibles.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>💳 Digital Wallet</h3>
+                <p>Secure storage for your digital stamps and tokens</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Transfers</h3>
+                <p>Blockchain-powered peer-to-peer transactions</p>
+            </div>
+            <div class="feature">
+                <h3>🛍️ Marketplace</h3>
+                <p>Buy, sell, and trade digital collectibles</p>
+            </div>
+            <div class="feature">
+                <h3>👤 User Profiles</h3>
+                <p>Verified accounts with complete profile management</p>
+            </div>
+        </div>
+
+        <a href="https://github.com/zedanazad43/stp" class="cta-button">View on GitHub</a>
+
+        <div class="languages">
+            <p>🇸🇦 العربية • 🇬🇧 English • 🇩🇪 Deutsch</p>
+        </div>
+    </div>
+</body>
+</html>
+EOF
+
+echo "Generated index.html in $OUTPUT_DIR"
+
+
+===== FILE: scripts/scripts_restructure-repo_Version2.sh =====
+...existing code...
+
+
+===== FILE: scripts/verify-runner-setup.sh =====
+#!/bin/bash
+
+# Self-Hosted Runner Verification Script
+# نص التحقق من العداء المستضاف ذاتيًا
+# Skript zur Überprüfung des Self-Hosted Runners
+
+set -e
+
+echo "═══════════════════════════════════════════════════════════════"
+echo "  Self-Hosted Runner Verification | التحقق من العداء المستضاف"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to check command
+check_command() {
+    if command -v "$1" &> /dev/null; then
+        echo -e "${GREEN}✓${NC} $1 is installed"
+        if [ -n "$2" ]; then
+            version=$($1 $2 2>&1 | head -n 1)
+            echo "  Version: $version"
+        fi
+        return 0
+    else
+        echo -e "${RED}✗${NC} $1 is NOT installed"
+        return 1
+    fi
+}
+
+# Function to check version
+check_version() {
+    local cmd=$1
+    local flag=$2
+    local min_version=$3
+    local current=$($cmd $flag 2>&1 | grep -oP '\d+\.\d+' | head -n 1)
+    
+    if [ -n "$current" ]; then
+        echo "  Found version: $current (minimum required: $min_version)"
+        return 0
+    fi
+    return 1
+}
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1. Checking Prerequisites | فحص المتطلبات الأساسية"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check Linux
+if [ "$(uname)" == "Linux" ]; then
+    echo -e "${GREEN}✓${NC} Running on Linux"
+    echo "  Distribution: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+else
+    echo -e "${YELLOW}⚠${NC} Not running on Linux (detected: $(uname))"
+fi
+echo ""
+
+# Check Node.js
+check_command "node" "--version"
+if command -v node &> /dev/null; then
+    node_version=$(node --version | grep -oP '\d+' | head -n 1)
+    if [ "$node_version" -ge 18 ]; then
+        echo -e "  ${GREEN}✓${NC} Node.js version is >= 18"
+    else
+        echo -e "  ${RED}✗${NC} Node.js version is < 18 (found: $node_version)"
+    fi
+fi
+echo ""
+
+# Check npm
+check_command "npm" "--version"
+echo ""
+
+# Check Docker (optional but recommended)
+if check_command "docker" "--version"; then
+    echo -e "  ${GREEN}✓${NC} Docker is available (required for docker-build job)"
+else
+    echo -e "  ${YELLOW}⚠${NC} Docker is not installed (optional, needed for docker-build job)"
+fi
+echo ""
+
+# Check Git
+check_command "git" "--version"
+echo ""
+
+# Check curl
+check_command "curl" "--version"
+echo ""
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "2. Checking System Resources | فحص موارد النظام"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check RAM
+total_ram=$(free -m | awk 'NR==2{print $2}')
+echo "RAM: ${total_ram}MB"
+if [ "$total_ram" -ge 2048 ]; then
+    echo -e "${GREEN}✓${NC} RAM is sufficient (>= 2GB)"
+else
+    echo -e "${RED}✗${NC} RAM is below recommended minimum (found: ${total_ram}MB, recommended: 2048MB)"
+fi
+echo ""
+
+# Check disk space
+available_space=$(df -h . | awk 'NR==2{print $4}')
+echo "Available disk space: $available_space"
+available_gb=$(df -BG . | awk 'NR==2{print $4}' | grep -oP '\d+')
+if [ "$available_gb" -ge 10 ]; then
+    echo -e "${GREEN}✓${NC} Disk space is sufficient (>= 10GB)"
+else
+    echo -e "${YELLOW}⚠${NC} Disk space is below recommended (found: ${available_gb}GB, recommended: 10GB)"
+fi
+echo ""
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "3. Checking Runner Installation | فحص تثبيت العداء"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check if runner directory exists
+if [ -d "actions-runner" ]; then
+    echo -e "${GREEN}✓${NC} actions-runner directory exists"
+    
+    # Check if runner is configured
+    if [ -f "actions-runner/.runner" ]; then
+        echo -e "${GREEN}✓${NC} Runner is configured"
+    else
+        echo -e "${YELLOW}⚠${NC} Runner is not configured yet"
+        echo "  Run: cd actions-runner && ./config.sh --url https://github.com/zedanazad43/stp --token YOUR_TOKEN"
+    fi
+    
+    # Check if runner service is installed
+    if systemctl list-units --type=service --all | grep -q "actions.runner"; then
+        echo -e "${GREEN}✓${NC} Runner service is installed"
+        
+        # Check if runner is running
+        if systemctl is-active --quiet actions.runner.*.service 2>/dev/null; then
+            echo -e "${GREEN}✓${NC} Runner service is RUNNING"
+        else
+            echo -e "${RED}✗${NC} Runner service is NOT running"
+            echo "  Run: sudo ./svc.sh start"
+        fi
+    else
+        echo -e "${YELLOW}⚠${NC} Runner service is not installed"
+        echo "  Run: cd actions-runner && sudo ./svc.sh install"
+    fi
+else
+    echo -e "${YELLOW}⚠${NC} actions-runner directory not found"
+    echo "  Follow setup instructions in QUICKSTART_SELF_HOSTED_RUNNER.md"
+fi
+echo ""
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "4. Summary | الملخص | Zusammenfassung"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+echo "Next Steps | الخطوات التالية:"
+echo ""
+echo "1. If runner is not set up, see: QUICKSTART_SELF_HOSTED_RUNNER.md"
+echo "   إذا لم يتم إعداد العداء، راجع: QUICKSTART_SELF_HOSTED_RUNNER.md"
+echo ""
+echo "2. Get registration token from:"
+echo "   احصل على رمز التسجيل من:"
+echo "   https://github.com/zedanazad43/stp/settings/actions/runners"
+echo ""
+echo "3. Configure runner labels: self-hosted,linux"
+echo "   قم بتكوين تسميات العداء: self-hosted,linux"
+echo ""
+echo "4. Verify runner appears in GitHub settings as 'Idle'"
+echo "   تحقق من ظهور العداء في إعدادات GitHub كـ 'Idle'"
+echo ""
+
+echo "═══════════════════════════════════════════════════════════════"
+echo "  Verification Complete | اكتمل التحقق | Überprüfung abgeschlossen"
+echo "═══════════════════════════════════════════════════════════════"
+
+
+===== FILE: stampcoin-platform/fix-sarif.sh =====
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   ./fix-sarif.sh /path/to/input.sarif [/path/to/output.sarif]
+# Defaults:
+#   input: ./results/javascript.sarif
+#   output: same name with .fixed.sarif suffix
+
+INPUT="${1:-./results/javascript.sarif}"
+OUTPUT="${2:-${INPUT%.sarif}.fixed.sarif}"
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Error: jq is required but not installed." >&2
+  exit 2
+fi
+
+if [ ! -f "$INPUT" ]; then
+  echo "Error: input file not found: $INPUT" >&2
+  exit 3
+fi
+
+# Recursively walk the JSON and normalize all string values:
+# - Replace backslashes with forward slashes
+# - Remove leading drive letter patterns like "C:/" or "D:/"
+jq '
+  def normalize_string:
+    (gsub("\\\\+"; "/") | sub("^[A-Za-z]:/"; ""));
+
+  def fix:
+    if type == "object" then
+      with_entries(.value |= fix)
+    elif type == "array" then
+      map(fix)
+    elif type == "string" then
+      normalize_string
+    else .
+    end;
+
+  fix
+' "$INPUT" > "$OUTPUT"
+
+# Quick verification
+if jq -e . "$OUTPUT" >/dev/null 2>&1; then
+  echo "Normalized SARIF written to: $OUTPUT"
+else
+  echo "Error: produced invalid JSON for $OUTPUT" >&2
+  exit 4
+fi
+
+
+===== FILE: stampcoin-platform/scripts_restructure-repo_Version2.sh =====
+#!/usr/bin/env bash
+# scripts/restructure-repo.sh
+# Usage: ./scripts/restructure-repo.sh
+# Safe reorganization script:
+# - creates branch refactor/restructure-repo
+# - moves files into client/, server/, infra/, scripts/, docs/
+# - archives versioned/duplicate files to docs/archive/
+# - commits changes and (optionally) pushes + opens a PR via gh
+set -euo pipefail
+
+BRANCH="refactor/restructure-repo"
+COMMIT_MSG="refactor: reorganize repository structure (client/server/docs/infra/scripts/archive)"
+PR_TITLE="refactor: reorganize repository structure"
+PR_BODY="This PR moves frontend components/pages/styles into client/src, server API code into server/src, infra files into infra/, and groups documentation into docs/. Versioned/duplicate files have been archived under docs/archive for review.\\n\\nIMPORTANT: Review docs/archive immediately for any sensitive data (recovery codes, tokens) and rotate/revoke as necessary.\\n\\nHow to review locally: git checkout ${BRANCH} && git show --name-only HEAD && run your build/tests."
+
+# Ensure we are in a git repo
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Error: run this from the repository root (inside a git repo)."
+  exit 1
+fi
+
+# Ensure working tree clean
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Error: working tree is not clean. Commit or stash changes before running this script."
+  git status --porcelain
+  exit 1
+fi
+
+# Create and switch to branch
+git checkout -b "${BRANCH}"
+
+# Create target folders
+mkdir -p client/src/{components,pages,styles,assets}
+mkdir -p server/src/api server/src/{controllers,utils}
+mkdir -p shared libs tests
+mkdir -p scripts/deploy scripts/db
+mkdir -p docs archive docs/archive infra config contracts assets
+
+echo "Directories created."
+
+# Helper: git mv if exists
+move_if_exists() {
+  src="$1"
+  dst="$2"
+  if [ -e "$src" ]; then
+    echo "Moving: $src -> $dst"
+    mkdir -p "$(dirname "$dst")"
+    git mv "$src" "$dst"
+  else
+    echo "Skip (not found): $src"
+  fi
+}
+
+# Move frontend components and pages (common names found)
+shopt -s nullglob
+for file in components_*.jsx components_*.js components_*.tsx; do
+  [ -e "$file" ] || continue
+  base="$(basename "$file" | sed -e 's/^components_//' -e 's/Version[0-9._ ()-]*//g')"
+  move_if_exists "$file" "client/src/components/${base}"
+done
+
+# Move explicit component files
+move_if_exists "components_Footer_Version2.jsx" "client/src/components/Footer.jsx"
+move_if_exists "components_Header_Version3.jsx" "client/src/components/Header.jsx"
+move_if_exists "components_StampCard_Version2.jsx" "client/src/components/StampCard.jsx"
+
+# Move styles
+move_if_exists "styles_globals_Version2.css" "client/src/styles/globals.css"
+move_if_exists "styles_globals_Version2 (1).css" "docs/archive/styles_globals_Version2_1.css"
+
+# Move main / entry
+move_if_exists "main.tsx.txt" "client/src/main.tsx"
+
+# Move API route files (pages_api_*) to server/src/api
+for file in pages_api_*; do
+  [ -e "$file" ] || continue
+  move_if_exists "$file" "server/src/api/$(basename "$file" | sed 's/pages_api_//')"
+done
+
+# Move page files (pages_*) to client/src/pages
+for file in pages_*; do
+  [ -e "$file" ] || continue
+  # skip API files already moved
+  if [[ "$file" == pages_api_* ]]; then
+    continue
+  fi
+  move_if_exists "$file" "client/src/pages/$(basename "$file" | sed 's/^pages_//')"
+done
+
+# Move deploy scripts to scripts/deploy
+for file in deploy-*.sh deploy-*.ps1 deploy-railway*.sh deploy-vercel.sh deploy-render.sh deploy-flyio.sh deploy-polygon.sh configure-production.sh start-*.sh; do
+  [ -e "$file" ] || continue
+  move_if_exists "$file" "scripts/deploy/$(basename "$file")"
+done
+
+# Move other scripts into scripts/
+for file in setup-*.sh setup-*.ps1 mass-mint-stamps.sh test-contract.sh start-nft-system.sh setup-dev.sh; do
+  [ -e "$file" ] || continue
+  move_if_exists "$file" "scripts/$(basename "$file")"
+done
+
+# Move infra files
+move_if_exists "Dockerfile" "infra/Dockerfile"
+move_if_exists "docker-compose.yml" "infra/docker-compose.yml"
+move_if_exists "docker-compose.override.yml" "infra/docker-compose.override.yml"
+move_if_exists "fly.toml" "infra/fly.toml"
+move_if_exists "render.yaml" "infra/render.yaml"
+move_if_exists "railway.json" "infra/railway.json"
+move_if_exists "nixpacks.toml" "infra/nixpacks.toml"
+move_if_exists "vercel-backend.json" "infra/vercel-backend.json"
+
+# Move contracts
+for file in contracts_*.sol; do
+  [ -e "$file" ] || continue
+  move_if_exists "$file" "contracts/$(basename "$file" | sed 's/^contracts_//')"
+done
+
+# Move prisma / drizzle / infra config to infra/ or config/
+move_if_exists "drizzle.config.ts" "infra/drizzle.config.ts"
+move_if_exists "prisma_schema_Version3.prisma" "infra/prisma_schema.prisma"
+move_if_exists "prisma_seed_Version3.js" "infra/prisma_seed.js"
+move_if_exists "vite.config.ts" "infra/vite.config.ts"
+move_if_exists "tsconfig.json" "infra/tsconfig.json"
+
+# Move docs: most .md to docs/, but keep README.md and SECURITY.md at root
+for md in *.md; do
+  if [ "$md" = "README.md" ] || [ "$md" = "SECURITY.md" ]; then
+    echo "Keeping at root: $md"
+    continue
+  fi
+  [ -e "$md" ] || continue
+  move_if_exists "$md" "docs/$(basename "$md")"
+done
+
+# Archive versioned files and backups into docs/archive
+mkdir -p docs/archive
+for pat in *Version* "* (1).*" "*_Version*; do
+  for file in $pat; do
+    [ -e "$file" ] || continue
+    # only move if still tracked at root
+    if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+      move_if_exists "$file" "docs/archive/$(basename "$file")"
+    fi
+  done
+done
+
+# Move env/examples to config/
+move_if_exists ".env.example" "config/.env.example"
+move_if_exists ".env.local.example" "config/.env.local.example"
+move_if_exists ".env.production.example" "config/.env.production.example"
+move_if_exists ".env.deployment.example" "config/.env.deployment.example"
+move_if_exists ".env.docker" "config/.env.docker"
+move_if_exists "env.placeholder" "config/env.placeholder"
+move_if_exists "env_Version2.example" "config/env_Version2.example"
+move_if_exists "env_Version3.example" "config/env_Version3.example"
+
+# Move package versioned JSONs to docs/archive
+for pj in package_Version*.json package_*.json todo-app_package_*.json; do
+  for file in $pj; do
+    [ -e "$file" ] || continue
+    move_if_exists "$file" "docs/archive/$(basename "$file")"
+  done
+done
+
+# Move suspicious/temporary files into docs/archive for inspection
+for tmp in "ddddddddddddd" "cp .env.placeholder .env" "github-recovery-codes*" "* (1).txt"; do
+  for file in $tmp; do
+    [ -e "$file" ] || continue
+    move_if_exists "$file" "docs/archive/$(basename "$file")"
+    echo "Warning: moved '$file' to docs/archive. Inspect for sensitive data and delete if needed."
+  done
+done
+
+# Final git add/commit
+git add -A
+if git diff --cached --quiet; then
+  echo "No changes to commit."
+else
+  git commit -m "${COMMIT_MSG}"
+fi
+
+echo "Refactor commit created on branch ${BRANCH}."
+
+# Ask user before push / PR
+read -p "Ready to push branch '${BRANCH}' and open a PR? (requires gh CLI and push permission) [y/N]: " CONFIRM
+CONFIRM=${CONFIRM:-N}
+if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
+  echo "Aborting push/PR creation. You can push manually later:"
+  echo "  git push -u origin ${BRANCH}"
+  echo "  gh pr create --base main --head ${BRANCH} --title \"${PR_TITLE}\" --body \"${PR_BODY}\""
+  exit 0
+fi
+
+# Check gh CLI
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Error: gh CLI not found. Install GitHub CLI and authenticate (gh auth login)."
+  exit 1
+fi
+
+# Check gh auth status
+if ! gh auth status >/dev/null 2>&1; then
+  echo "Error: gh is not authenticated. Run: gh auth login"
+  exit 1
+fi
+
+# Push branch
+git push -u origin "${BRANCH}"
+
+# Create PR
+gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
+
+echo "Pull request created. Review it on GitHub."
+
+
+===== FILE: stampcoin-platform/scripts/scripts_restructure-repo_Version2.sh =====
+...existing code...
+
+
+===== FILE: start.sh =====
+#!/bin/bash
+echo "جاري بدء تشغيل منصة ستامكوين..."
+echo "يرجى التأكد من تثبيت Node.js 16.x أو إصدار أحدث"
+
+# التحقق من تثبيت Node.js
+if ! command -v node &> /dev/null; then
+    echo "خطأ: لم يتم العثور على Node.js، يرجى تثبيت Node.js أولاً"
+    exit 1
+fi
+
+# التحقق من تثبيت الاعتمادات
+if [ ! -d "node_modules" ]; then
+    echo "جاري تثبيت الاعتمادات..."
+    npm install
+    if [ $? -ne 0 ]; then
+        echo "خطأ: فشل تثبيت الاعتمادات"
+        exit 1
+    fi
+fi
+
+# التحقق من ملف متغيرات البيئة
+if [ ! -f ".env" ]; then
+    echo "تحذير: لم يتم العثور على ملف .env، سيتم استخدام الإعدادات الافتراضية"
+    echo "يرجى إنشاء ملف .env يدوياً وتعيين SYNC_TOKEN"
+fi
+
+# بدء الخادم
+echo "جاري بدء تشغيل الخادم..."
+npm start
+
+
+===== FILE: wallet-demo.sh =====
+#!/bin/bash
+# Digital Wallet API Example Usage
+# مثال على استخدام واجهة برمجة تطبيقات المحفظة الرقمية
+
+echo "=== Stampcoin Digital Wallet Demo ==="
+echo "=== عرض توضيحي للمحفظة الرقمية لـ Stampcoin ==="
+echo ""
+
+BASE_URL="http://localhost:8080/api"
+
+# Step 1: Create wallets | الخطوة 1: إنشاء المحافظ
+echo "1. Creating wallets | إنشاء المحافظ..."
+curl -X POST $BASE_URL/wallets \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "user001", "userName": "محمد أحمد"}' | jq .
+echo ""
+
+curl -X POST $BASE_URL/wallets \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "user002", "userName": "فاطمة علي"}' | jq .
+echo ""
+
+# Step 2: Add balance | الخطوة 2: إضافة رصيد
+echo "2. Adding balance | إضافة رصيد..."
+curl -X POST $BASE_URL/wallets/user001/balance \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 1000}' | jq .
+echo ""
+
+curl -X POST $BASE_URL/wallets/user002/balance \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 500}' | jq .
+echo ""
+
+# Step 3: Add stamps | الخطوة 3: إضافة الطوابع
+echo "3. Adding digital stamps | إضافة الطوابع الرقمية..."
+curl -X POST $BASE_URL/wallets/user001/stamps \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "طابع تذكاري 2024",
+    "value": 150,
+    "rarity": "نادر",
+    "description": "طابع تذكاري للألعاب الأولمبية"
+  }' | jq .
+echo ""
+
+curl -X POST $BASE_URL/wallets/user001/stamps \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Vintage Classic 1960",
+    "value": 200,
+    "rarity": "legendary",
+    "description": "Rare vintage stamp from 1960"
+  }' | jq .
+echo ""
+
+# Step 4: View wallets | الخطوة 4: عرض المحافظ
+echo "4. Viewing all wallets | عرض جميع المحافظ..."
+curl -s $BASE_URL/wallets | jq .
+echo ""
+
+# Step 5: Transfer balance | الخطوة 5: تحويل الرصيد
+echo "5. Transferring 100 credits from user001 to user002..."
+echo "   تحويل 100 رصيد من user001 إلى user002..."
+curl -X POST $BASE_URL/wallets/transfer \
+  -H "Content-Type: application/json" \
+  -d '{"fromUserId": "user001", "toUserId": "user002", "amount": 100}' | jq .
+echo ""
+
+# Step 6: View transaction history | الخطوة 6: عرض سجل المعاملات
+echo "6. Viewing transaction history | عرض سجل المعاملات..."
+curl -s $BASE_URL/transactions | jq .
+echo ""
+
+# Step 7: Final wallet states | الخطوة 7: الحالة النهائية للمحافظ
+echo "7. Final wallet states | الحالة النهائية للمحافظ:"
+echo ""
+echo "User 001 wallet:"
+curl -s $BASE_URL/wallets/user001 | jq .
+echo ""
+echo "User 002 wallet:"
+curl -s $BASE_URL/wallets/user002 | jq .
+echo ""
+
+echo "=== Demo Complete | العرض التوضيحي مكتمل ==="

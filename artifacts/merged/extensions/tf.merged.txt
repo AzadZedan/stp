@@ -1,0 +1,11 @@
+# Merged extension: .tf
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 1
+
+
+
+===== FILE: main.tf =====
+# ملف إعداد Terraform (HCL)
+tf {
+  required_version = ">= 1.0.0"
+}

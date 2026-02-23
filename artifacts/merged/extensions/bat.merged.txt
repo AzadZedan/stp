@@ -1,0 +1,39 @@
+# Merged extension: .bat
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 1
+
+
+
+===== FILE: start.bat =====
+@echo off
+echo جاري بدء تشغيل منصة ستامكوين...
+echo يرجى التأكد من تثبيت Node.js 16.x أو إصدار أحدث
+
+REM التحقق من تثبيت Node.js
+node --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo خطأ: لم يتم العثور على Node.js، يرجى تثبيت Node.js أولاً
+    pause
+    exit /b 1
+)
+
+REM التحقق من تثبيت الاعتمادات
+if not exist "node_modules" (
+    echo جاري تثبيت الاعتمادات...
+    npm install
+    if %errorlevel% neq 0 (
+        echo خطأ: فشل تثبيت الاعتمادات
+        pause
+        exit /b 1
+    )
+)
+
+REM التحقق من ملف متغيرات البيئة
+if not exist ".env" (
+    echo تحذير: لم يتم العثور على ملف .env، سيتم استخدام الإعدادات الافتراضية
+    echo يرجى إنشاء ملف .env يدوياً وتعيين SYNC_TOKEN
+)
+
+REM بدء الخادم
+echo جاري بدء تشغيل الخادم...
+npm start

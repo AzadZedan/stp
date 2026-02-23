@@ -1,22 +1,22 @@
-...existing code...# خريطة الطريق / Roadmap / Roadmap
+# خريطة الطريق / Roadmap / Roadmap
 
-## العربية 🇸🇦
+## العربية
 
 - الشهر 1: تنظيم الملفات وتكامل التوثيق
-- الشهر 2–3: بناء أساسيات المنصة/المحفظة والسوق
+- الشهر 2-3: بناء أساسيات المنصة والمحفظة والسوق
 - الشهر 4: دمج الواجهة وتوسيع المميزات
 - الشهر 5+: استقطاب الشركاء والمستثمرين
 
-## English 🇬🇧
+## English
 
-- Month 1: Documentation & structure
-- 2-3: Platform, wallet, marketplace core
-- 4: UI/UX + expand features
-- 5+: Partner & investor outreach
+- Month 1: Documentation and repository structure
+- Month 2-3: Platform, wallet, and marketplace core
+- Month 4: UI integration and feature expansion
+- Month 5+: Partner and investor outreach
 
-## Deutsch 🇩🇪
+## Deutsch
 
-- Monat 1: Struktur & Doku
-- 2-3: Basis-Features, Wallet, Marktplatz
-- 4: Oberfläche & erweiterte Features
-- 5+: Investoren/Partnersuche
+- Monat 1: Struktur und Dokumentation
+- Monat 2-3: Kernfunktionen, Wallet und Marktplatz
+- Monat 4: UI-Integration und Feature-Ausbau
+- Monat 5+: Partner- und Investorengewinnung

@@ -1,0 +1,2428 @@
+# Merged extension: .html
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 4
+
+
+
+===== FILE: docs/index.html =====
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Platform - STP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .description {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.8;
+            text-align: center;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .feature {
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .feature p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .documentation {
+            margin: 40px 0;
+            padding: 30px;
+            background: #f0f4ff;
+            border-radius: 10px;
+        }
+        .documentation h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        .doc-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .doc-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #444;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .doc-link:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        .doc-link-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        .doc-link-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .doc-link-desc {
+            font-size: 0.9em;
+            color: #888;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .languages {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            text-align: center;
+            color: #888;
+        }
+        footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            text-align: center;
+            color: #888;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #4caf50;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 10px 5px;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .features { grid-template-columns: 1fr; }
+            .container { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Stampcoin Platform</h1>
+            <p class="subtitle">منصة رقمية | Digital Platform | Digitale Plattform</p>
+            <div>
+                <span class="status-badge">✓ Live</span>
+                <span class="status-badge">✓ Open Source</span>
+            </div>
+        </header>
+        
+        <p class="description">
+            An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
+            Secure peer-to-peer transfers and a marketplace for digital collectibles powered by 
+            transparency and community trust.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>💳 Digital Wallet</h3>
+                <p>Secure storage and management of your digital stamps and tokens with blockchain technology</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Transfers</h3>
+                <p>Blockchain-powered peer-to-peer transactions with complete transparency and security</p>
+            </div>
+            <div class="feature">
+                <h3>🛍️ Marketplace</h3>
+                <p>Buy, sell, and trade digital collectibles in a trusted community marketplace</p>
+            </div>
+            <div class="feature">
+                <h3>👤 User Profiles</h3>
+                <p>Verified accounts with complete profile management and collection tracking</p>
+            </div>
+        </div>
+
+        <div class="documentation">
+            <h2>📚 Documentation</h2>
+            <div class="doc-links">
+                <a href="../README.md" class="doc-link">
+                    <span class="doc-link-icon">📖</span>
+                    <div>
+                        <div class="doc-link-title">README</div>
+                        <div class="doc-link-desc">Main repository documentation in Arabic, English, and German</div>
+                    </div>
+                </a>
+                <a href="../INSTALLATION.md" class="doc-link">
+                    <span class="doc-link-icon">⚙️</span>
+                    <div>
+                        <div class="doc-link-title">Installation Guide</div>
+                        <div class="doc-link-desc">Complete setup and installation instructions</div>
+                    </div>
+                </a>
+                <a href="business-onepager_Version6.md" class="doc-link">
+                    <span class="doc-link-icon">📄</span>
+                    <div>
+                        <div class="doc-link-title">Business One-Pager</div>
+                        <div class="doc-link-desc">Complete business plan in Arabic, English, and German</div>
+                    </div>
+                </a>
+                <a href="roadmap.md" class="doc-link">
+                    <span class="doc-link-icon">🗺️</span>
+                    <div>
+                        <div class="doc-link-title">Project Roadmap</div>
+                        <div class="doc-link-desc">Development timeline and milestones</div>
+                    </div>
+                </a>
+                <a href="../CONTRIBUTING.md" class="doc-link">
+                    <span class="doc-link-icon">🤝</span>
+                    <div>
+                        <div class="doc-link-title">Contributing Guidelines</div>
+                        <div class="doc-link-desc">How to contribute to the Stampcoin platform</div>
+                    </div>
+                </a>
+                <a href="../SECURITY.md" class="doc-link">
+                    <span class="doc-link-icon">🔒</span>
+                    <div>
+                        <div class="doc-link-title">Security Policy</div>
+                        <div class="doc-link-desc">Security policies and vulnerability reporting</div>
+                    </div>
+                </a>
+                <a href="../WINDOWS_SETUP.md" class="doc-link">
+                    <span class="doc-link-icon">🪟</span>
+                    <div>
+                        <div class="doc-link-title">Windows Setup Guide</div>
+                        <div class="doc-link-desc">Detailed setup instructions for Windows users</div>
+                    </div>
+                </a>
+                <a href="../CHANGELOG.md" class="doc-link">
+                    <span class="doc-link-icon">📝</span>
+                    <div>
+                        <div class="doc-link-title">Changelog</div>
+                        <div class="doc-link-desc">Version history and release notes</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <a href="https://github.com/zedanazad43/stp" class="cta-button">📦 View on GitHub</a>
+            <a href="https://github.com/zedanazad43/stp/issues" class="cta-button">💡 Report Issues</a>
+        </div>
+
+        <div class="languages">
+            <p><strong>Multilingual Support</strong></p>
+            <p>🇸🇦 العربية • 🇬🇧 English • 🇩🇪 Deutsch</p>
+        </div>
+
+        <footer>
+            <p><strong>Contact:</strong></p>
+            <p>Azad Zedan - Founder of Stampcoin</p>
+            <p>Email: <a href="mailto:stampcoin.contact@gmail.com">stampcoin.contact@gmail.com</a></p>
+            <p>WhatsApp/Telegram: +49 1521 6933122</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                © 2024-2026 Stampcoin Platform. Built with ❤️ for collectors worldwide.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
+
+
+===== FILE: docs/roadmap.html =====
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Roadmap</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #667eea;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            padding-left: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #667eea;
+        }
+
+        .timeline-item h2 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .timeline-item ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .timeline-item li {
+            margin-bottom: 8px;
+        }
+
+        .lang-section {
+            margin-bottom: 50px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <h1>🗺️ Stampcoin Roadmap</h1>
+
+        <div class="lang-section">
+            <h2 style="color: #667eea; margin-bottom: 20px;">🇸🇦 العربية</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h2>الشهر 1: تنظيم الملفات وتكامل التوثيق</h2>
+                    <ul>
+                        <li>إعداد بنية المشروع الأساسية</li>
+                        <li>إنشاء التوثيق الشامل</li>
+                        <li>إعداد بيئة التطوير</li>
+                        <li>إطلاق الموقع الرسمي</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>الشهر 2-3: بناء أساسيات المنصة/المحفظة والسوق</h2>
+                    <ul>
+                        <li>تطوير نظام المحفظة الرقمية</li>
+                        <li>بناء منصة السوق الإلكتروني</li>
+                        <li>تطبيق تقنية البلوكشين</li>
+                        <li>إنشاء نظام المصادقة والأمان</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>الشهر 4: دمج الواجهة وتوسيع المميزات</h2>
+                    <ul>
+                        <li>تصميم واجهة المستخدم الكاملة</li>
+                        <li>دمج API للخدمات الخارجية</li>
+                        <li>إضافة ميزات التداول المتقدمة</li>
+                        <li>تحسين تجربة المستخدم</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>الشهر 5+: استقطاب الشركاء والمستثمرين</h2>
+                    <ul>
+                        <li>إطلاق النسخة التجريبية</li>
+                        <li>التواصل مع المستثمرين المحتملين</li>
+                        <li>بناء شراكات استراتيجية</li>
+                        <li>توسيع قاعدة المستخدمين</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="lang-section">
+            <h2 style="color: #667eea; margin-bottom: 20px;">🇬🇧 English</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h2>Month 1: Documentation & Structure</h2>
+                    <ul>
+                        <li>Set up core project structure</li>
+                        <li>Create comprehensive documentation</li>
+                        <li>Establish development environment</li>
+                        <li>Launch official website</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Months 2-3: Platform, Wallet, Marketplace Core</h2>
+                    <ul>
+                        <li>Develop digital wallet system</li>
+                        <li>Build marketplace platform</li>
+                        <li>Implement blockchain technology</li>
+                        <li>Create authentication and security system</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Month 4: UI/UX + Expand Features</h2>
+                    <ul>
+                        <li>Design complete user interface</li>
+                        <li>Integrate API for external services</li>
+                        <li>Add advanced trading features</li>
+                        <li>Enhance user experience</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Month 5+: Partner & Investor Outreach</h2>
+                    <ul>
+                        <li>Launch beta version</li>
+                        <li>Connect with potential investors</li>
+                        <li>Build strategic partnerships</li>
+                        <li>Expand user base</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="lang-section">
+            <h2 style="color: #667eea; margin-bottom: 20px;">🇩🇪 Deutsch</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h2>Monat 1: Struktur & Dokumentation</h2>
+                    <ul>
+                        <li>Grundlegende Projektstruktur einrichten</li>
+                        <li>Umfassende Dokumentation erstellen</li>
+                        <li>Entwicklungsumgebung aufbauen</li>
+                        <li>Offizielle Website starten</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Monate 2-3: Basis-Features, Wallet, Marktplatz</h2>
+                    <ul>
+                        <li>Digitales Wallet-System entwickeln</li>
+                        <li>Marktplatz-Plattform aufbauen</li>
+                        <li>Blockchain-Technologie implementieren</li>
+                        <li>Authentifizierungs- und Sicherheitssystem erstellen</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Monat 4: Oberfläche & erweiterte Features</h2>
+                    <ul>
+                        <li>Vollständige Benutzeroberfläche gestalten</li>
+                        <li>API für externe Dienste integrieren</li>
+                        <li>Erweiterte Handelsfunktionen hinzufügen</li>
+                        <li>Benutzererfahrung verbessern</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h2>Monat 5+: Investoren/Partnersuche</h2>
+                    <ul>
+                        <li>Beta-Version veröffentlichen</li>
+                        <li>Kontakt zu potenziellen Investoren</li>
+                        <li>Strategische Partnerschaften aufbauen</li>
+                        <li>Benutzerbasis erweitern</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid #eee;">
+            <p style="color: #666;">© 2026 Stampcoin Platform. All rights reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/zedanazad43/stp" style="color: #667eea; text-decoration: none;">GitHub</a> | 
+                <a href="../index.html" style="color: #667eea; text-decoration: none;">Home</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+===== FILE: index.html =====
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Stampcoin - Digital Platform for Blockchain-based Stamp Trading and Collectibles">
+    <meta name="keywords" content="stampcoin, blockchain, digital stamps, collectibles, marketplace, NFT">
+    <meta name="author" content="Azad Zedan">
+    <title>Stampcoin - Digital Stamp Trading Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            border-radius: 10px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .language-switcher {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .language-switcher button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .language-switcher button:hover,
+        .language-switcher button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content-section {
+            background: white;
+            padding: 40px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content.active {
+            display: block;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin: 20px 0 10px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .contact-info {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .contact-info a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            margin-top: 40px;
+            border-radius: 10px;
+            color: #666;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2em;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+
+            .language-switcher button {
+                margin: 5px;
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🪙 Stampcoin</div>
+            <div class="tagline">Digital Platform for Blockchain-based Stamp Trading</div>
+            
+            <div class="language-switcher">
+                <button onclick="switchLanguage('en')" class="active" id="btn-en">🇬🇧 English</button>
+                <button onclick="switchLanguage('ar')" id="btn-ar">🇸🇦 العربية</button>
+                <button onclick="switchLanguage('de')" id="btn-de">🇩🇪 Deutsch</button>
+            </div>
+        </header>
+
+        <!-- English Content -->
+        <div id="content-en" class="lang-content active">
+            <div class="content-section">
+                <h2>About Stampcoin</h2>
+                <p>Stampcoin is an innovative platform for digital currency based on blockchain technology, focused on digital stamps, rewards, and loyalty tokens.</p>
+                
+                <h3>Key Features</h3>
+                <div class="features">
+                    <div class="feature-card">
+                        <h4>💼 Digital Wallet</h4>
+                        <p>Secure digital stamps wallet with blockchain technology</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔒 Secure Transfers</h4>
+                        <p>Safe peer-to-peer transactions and transfers</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏪 Marketplace</h4>
+                        <p>Trade digital stamps and collectibles</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Verification</h4>
+                        <p>User profile management and verification system</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔌 API Integration</h4>
+                        <p>Complete API for third-party integrations</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🌐 Multi-language</h4>
+                        <p>Support for Arabic, English, and German</p>
+                    </div>
+                </div>
+
+                <h3>Technology Stack</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Node.js</span>
+                    <span class="tech-badge">TypeScript</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Blockchain</span>
+                    <span class="tech-badge">Prisma ORM</span>
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">GitHub Actions</span>
+                    <span class="tech-badge">Jest</span>
+                </div>
+
+                <h3>Getting Started</h3>
+                <p>To get started with Stampcoin platform:</p>
+                <pre><code>git clone https://github.com/zedanazad43/stp.git
+cd stp
+npm install
+npm run dev</code></pre>
+
+                <p>For detailed installation instructions, see <a href="INSTALLATION.md">INSTALLATION.md</a></p>
+            </div>
+
+            <div class="cta-section">
+                <h2>Ready to Get Started?</h2>
+                <p style="font-size: 1.1em; margin: 20px 0;">Join the future of digital stamp trading</p>
+                <a href="https://github.com/zedanazad43/stp" class="cta-button">View on GitHub</a>
+                <a href="roadmap.html" class="cta-button">View Roadmap</a>
+            </div>
+
+            <div class="content-section contact-info">
+                <h2>Contact Information</h2>
+                <p><strong>Founder:</strong> Azad Zedan</p>
+                <p><strong>Email:</strong> <a href="mailto:azadzedan13@gmail.com">azadzedan13@gmail.com</a></p>
+                <p><strong>Official Email:</strong> <a href="mailto:stampcoin.contact@gmail.com">stampcoin.contact@gmail.com</a></p>
+                <p><strong>GitHub:</strong> <a href="https://github.com/AzadZedan">@AzadZedan</a></p>
+                <p><strong>WhatsApp / Telegram:</strong> +49 1521 6933122</p>
+            </div>
+        </div>
+
+        <!-- Arabic Content -->
+        <div id="content-ar" class="lang-content" dir="rtl">
+            <div class="content-section">
+                <h2>عن Stampcoin</h2>
+                <p>Stampcoin منصة رقمية مبتكرة مبنية على تكنولوجيا البلوكشين، متخصصة في جمع وتداول الطوابع الرقمية والمكافآت وهدايا الولاء.</p>
+                
+                <h3>المميزات الرئيسية</h3>
+                <div class="features">
+                    <div class="feature-card">
+                        <h4>💼 محفظة رقمية</h4>
+                        <p>محفظة طوابع رقمية آمنة بتقنية البلوكشين</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔒 تحويلات آمنة</h4>
+                        <p>تعاملات آمنة بين المستخدمين</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏪 سوق إلكتروني</h4>
+                        <p>تداول الطوابع الرقمية والمقتنيات</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ التحقق</h4>
+                        <p>إدارة ملفات المستخدم والتحقق</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔌 تكامل API</h4>
+                        <p>واجهة برمجية كاملة للتكاملات الخارجية</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🌐 متعدد اللغات</h4>
+                        <p>دعم العربية والإنجليزية والألمانية</p>
+                    </div>
+                </div>
+
+                <h3>التقنيات المستخدمة</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Node.js</span>
+                    <span class="tech-badge">TypeScript</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Blockchain</span>
+                    <span class="tech-badge">Prisma ORM</span>
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">GitHub Actions</span>
+                    <span class="tech-badge">Jest</span>
+                </div>
+
+                <h3>البدء</h3>
+                <p>للبدء مع منصة Stampcoin:</p>
+                <pre><code>git clone https://github.com/zedanazad43/stp.git
+cd stp
+npm install
+npm run dev</code></pre>
+
+                <p>لمزيد من التفاصيل، راجع <a href="INSTALLATION.md">INSTALLATION.md</a></p>
+            </div>
+
+            <div class="cta-section">
+                <h2>جاهز للبدء؟</h2>
+                <p style="font-size: 1.1em; margin: 20px 0;">انضم إلى مستقبل تداول الطوابع الرقمية</p>
+                <a href="https://github.com/zedanazad43/stp" class="cta-button">عرض على GitHub</a>
+                <a href="roadmap.html" class="cta-button">عرض خارطة الطريق</a>
+            </div>
+
+            <div class="content-section contact-info">
+                <h2>معلومات الاتصال</h2>
+                <p><strong>المؤسس:</strong> Azad Zedan</p>
+                <p><strong>البريد الإلكتروني:</strong> <a href="mailto:azadzedan13@gmail.com">azadzedan13@gmail.com</a></p>
+                <p><strong>البريد الرسمي:</strong> <a href="mailto:stampcoin.contact@gmail.com">stampcoin.contact@gmail.com</a></p>
+                <p><strong>GitHub:</strong> <a href="https://github.com/AzadZedan">@AzadZedan</a></p>
+                <p><strong>واتساب / تيليجرام:</strong> +49 1521 6933122</p>
+            </div>
+        </div>
+
+        <!-- German Content -->
+        <div id="content-de" class="lang-content">
+            <div class="content-section">
+                <h2>Über Stampcoin</h2>
+                <p>Stampcoin ist eine innovative Plattform auf Blockchain-Basis für digitale Briefmarken, Prämien und loyale Sammler.</p>
+                
+                <h3>Hauptmerkmale</h3>
+                <div class="features">
+                    <div class="feature-card">
+                        <h4>💼 Digitale Wallet</h4>
+                        <p>Sichere digitale Briefmarken-Wallet mit Blockchain-Technologie</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔒 Sichere Übertragungen</h4>
+                        <p>Sichere Nutzer-Transaktionen</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏪 Marktplatz</h4>
+                        <p>Handel mit digitalen Briefmarken und Sammlerstücken</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Verifizierung</h4>
+                        <p>Nutzerprofile & Verifikationen</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔌 API-Integration</h4>
+                        <p>Vollständige API für Drittanbieter-Integrationen</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🌐 Mehrsprachig</h4>
+                        <p>Unterstützung für Arabisch, Englisch und Deutsch</p>
+                    </div>
+                </div>
+
+                <h3>Technologie-Stack</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Node.js</span>
+                    <span class="tech-badge">TypeScript</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Blockchain</span>
+                    <span class="tech-badge">Prisma ORM</span>
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">GitHub Actions</span>
+                    <span class="tech-badge">Jest</span>
+                </div>
+
+                <h3>Erste Schritte</h3>
+                <p>Um mit der Stampcoin-Plattform zu beginnen:</p>
+                <pre><code>git clone https://github.com/zedanazad43/stp.git
+cd stp
+npm install
+npm run dev</code></pre>
+
+                <p>Für detaillierte Installationsanweisungen siehe <a href="INSTALLATION.md">INSTALLATION.md</a></p>
+            </div>
+
+            <div class="cta-section">
+                <h2>Bereit loszulegen?</h2>
+                <p style="font-size: 1.1em; margin: 20px 0;">Werden Sie Teil der Zukunft des digitalen Briefmarkenhandels</p>
+                <a href="https://github.com/zedanazad43/stp" class="cta-button">Auf GitHub ansehen</a>
+                <a href="roadmap.html" class="cta-button">Roadmap ansehen</a>
+            </div>
+
+            <div class="content-section contact-info">
+                <h2>Kontaktinformationen</h2>
+                <p><strong>Gründer:</strong> Azad Zedan</p>
+                <p><strong>E-Mail:</strong> <a href="mailto:azadzedan13@gmail.com">azadzedan13@gmail.com</a></p>
+                <p><strong>Offizielle E-Mail:</strong> <a href="mailto:stampcoin.contact@gmail.com">stampcoin.contact@gmail.com</a></p>
+                <p><strong>GitHub:</strong> <a href="https://github.com/AzadZedan">@AzadZedan</a></p>
+                <p><strong>WhatsApp / Telegram:</strong> +49 1521 6933122</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Stampcoin Platform. All rights reserved.</p>
+            <p>Built with ❤️ for digital stamp collectors worldwide</p>
+            <p><a href="https://github.com/zedanazad43/stp">GitHub</a> | <a href="SECURITY.md">Security</a> | <a href="CONTRIBUTING.md">Contributing</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function switchLanguage(lang) {
+            // Hide all content
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.language-switcher button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected language content
+            document.getElementById('content-' + lang).classList.add('active');
+            document.getElementById('btn-' + lang).classList.add('active');
+            
+            // Update direction for Arabic
+            if (lang === 'ar') {
+                document.body.style.direction = 'rtl';
+            } else {
+                document.body.style.direction = 'ltr';
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+===== FILE: public/index.html =====
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin - منصة رقمية متقدمة لجمع الطوابع | Advanced Digital Stamps Platform</title>
+    <meta name="description" content="منصة Stampcoin الرقمية المتقدمة لجمع وتداول الطوابع الرقمية. محفظة آمنة، سوق عالمي، معايير فيديرالية.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Cairo', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            z-index: 99;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .lang-btn {
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.2rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: 0.3rem;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn.active {
+            background: #1a237e;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .lang-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .lang-btn.active:hover {
+            background: #283593;
+        }
+        
+        /* Hidden by default */
+        .language-section {
+            display: none;
+        }
+        
+        .language-section.active {
+            display: block;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-stamp {
+            font-size: 2rem;
+        }
+        
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+        
+        nav a:hover {
+            opacity: 0.8;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e55a28;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,53,0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: #1a237e;
+        }
+        
+        /* Features Section */
+        .features {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1a237e;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.8rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            color: #1a237e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* FIP Partnership Section */
+        .fip-partnership {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+            border-left: 5px solid #1a237e;
+        }
+        
+        .fip-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .fip-text h3 {
+            color: #1a237e;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .fip-text p {
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+        
+        .fip-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: #1a237e;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .fip-link:hover {
+            background: #283593;
+        }
+        
+        .fip-badge {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+        
+        /* Security Section */
+        .security {
+            background: white;
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+        }
+        
+        .security-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .security h2 {
+            text-align: center;
+            font-size: 2rem;
+            color: #1a237e;
+            margin-bottom: 2rem;
+        }
+        
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .security-item {
+            text-align: center;
+            padding: 2rem;
+            background: #f5f5f5;
+            border-radius: 0.8rem;
+        }
+        
+        .security-item h3 {
+            color: #1a237e;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        /* API Documentation */
+        .api-section {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+        }
+        
+        .api-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .api-content h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .api-endpoint {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Footer */
+        footer {
+            background: #1a237e;
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #ff6b35;
+        }
+        
+        .footer-section a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 2rem;
+            color: #aaa;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .fip-content {
+                grid-template-columns: 1fr;
+            }
+            
+            nav {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .language-selector {
+                right: 10px;
+                top: 50px;
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button class="lang-btn active" onclick="setLanguage('ar')">العربية</button>
+        <button class="lang-btn" onclick="setLanguage('en')">English</button>
+        <button class="lang-btn" onclick="setLanguage('de')">Deutsch</button>
+        <button class="lang-btn" onclick="setLanguage('zh')">中文</button>
+        <button class="lang-btn" onclick="setLanguage('es')">Español</button>
+        <button class="lang-btn" onclick="setLanguage('fr')">Français</button>
+    </div>
+
+    <!-- ARABIC VERSION -->
+    <div id="ar" class="language-section active">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">المميزات</a>
+                    <a href="#fip">شراكة FIP</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">لوحة التحكم</a>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">منصة رقمية متقدمة لجمع الطوابع</h2>
+                <p class="hero-subtitle">المنصة الدولية الآمنة لجمع وتداول الطوابع الرقمية</p>
+                <p style="font-size: 1.1rem; margin-bottom: 2rem;">
+                    منصة عالمية آمنة لجمع وتداول الطوابع الرقمية مع معايير فيديرالية عالمية
+                </p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">
+                        ابدأ الآن
+                    </button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">
+                        تعرف على FIP
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Features -->
+        <section id="features" class="features">
+            <h2>المميزات الرئيسية</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>محفظة آمنة</h3>
+                    <p>محفظة رقمية آمنة تماماً مع تشفير عالي المستوى وحماية الخصوصية الكاملة</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>سوق عالمي</h3>
+                    <p>تبادل الطوابع مع مجمعين من جميع أنحاء العالم في سوق آمنة وموثوقة</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>تتبع القيمة</h3>
+                    <p>تابع قيمة مجموعتك وتاريخ الأسعار مع تحليلات متقدمة</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>معايير فيديرالية</h3>
+                    <p>تلتزم بمعايير Federation Internationale de Philatélie العالمية</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>التحويلات الآمنة</h3>
+                    <p>تحويلات نقطة إلى نقطة آمنة مع سجل معاملات كامل</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>متعدد اللغات</h3>
+                    <p>واجهة متعددة اللغات: العربية، الإنجليزية، الفرنسية، الألمانية والصينية</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- FIP Partnership -->
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ شراكة FIP الرسمية</h3>
+                    <p>منصة Stampcoin تتبع معايير Federation Internationale de Philatélie (الاتحاد الدولي للفيلاتيليا)، أكبر منظمة عالمية لجمع الطوابع.</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>معايير FIP تشمل:</strong>
+                        <br>✓ جودة عالية من التحقق
+                        <br>✓ تصنيفات دولية موحدة
+                        <br>✓ حماية المجموعات النادرة
+                        <br>✓ معايير الحفظ الدولية
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 موقع FIP الرسمي</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">معتمد من<br>FIP الدولية</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Security -->
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 الأمان والموثوقية</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>التشفير 256-bit</h3>
+                        <p>أعلى مستويات التشفير الصناعي</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>2FA Authentication</h3>
+                        <p>المصادقة متعددة العوامل</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>سجل معاملات كامل</h3>
+                        <p>تتبع شامل لجميع العمليات</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>توثيق الأصالة</h3>
+                        <p>التحقق الدولي من الطوابع</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>دعم 24/7</h3>
+                        <p>دعم عملاء على مدار الساعة</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>HTTPS الكامل</h3>
+                        <p>اتصالات مشفرة دائماً</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>عن Stampcoin</h3>
+                    <a href="#features">المميزات</a>
+                    <a href="#fip">شراكة FIP</a>
+                </div>
+                <div class="footer-section">
+                    <h3>الموارد</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>التواصل</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP Official</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. جميع الحقوق محفوظة</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ENGLISH VERSION -->
+    <div id="en" class="language-section">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">Features</a>
+                    <a href="#fip">FIP Partnership</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">Dashboard</a>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Advanced Digital Stamps Platform</h2>
+                <p class="hero-subtitle">The Global Secure Platform for Collecting and Trading Digital Stamps</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">Get Started</button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">Learn More</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <h2>Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure Wallet</h3>
+                    <p>Completely secure digital wallet with high-level encryption and full privacy protection</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Global Marketplace</h3>
+                    <p>Exchange stamps with collectors from around the world in a safe and reliable marketplace</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Value Tracking</h3>
+                    <p>Track your collection value and price history with advanced analytics</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>FIP Standards</h3>
+                    <p>Complies with Federation Internationale de Philatélie international standards</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Safe Transfers</h3>
+                    <p>Secure peer-to-peer transfers with complete transaction history</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multilingual</h3>
+                    <p>Multilingual interface: Arabic, English, French, German, Spanish, Chinese</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ Official FIP Partnership</h3>
+                    <p>Stampcoin Platform adheres to the standards of Federation Internationale de Philatélie (FIP), the world's leading philatelic organization.</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>FIP Standards Include:</strong>
+                        <br>✓ High quality verification
+                        <br>✓ Unified international classifications
+                        <br>✓ Rare stamps protection
+                        <br>✓ International preservation standards
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 FIP Official Website</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">Certified by<br>International FIP</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 Security & Reliability</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>256-bit Encryption</h3>
+                        <p>Highest level of industrial encryption</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>2FA Authentication</h3>
+                        <p>Multi-factor authentication</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>Full Transaction Log</h3>
+                        <p>Complete tracking of all operations</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>Authenticity Verification</h3>
+                        <p>International stamp verification</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>24/7 Support</h3>
+                        <p>Round-the-clock customer support</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>Full HTTPS</h3>
+                        <p>Always encrypted connections</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Stampcoin</h3>
+                    <a href="#features">Features</a>
+                    <a href="#fip">FIP Partnership</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP Official</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. All Rights Reserved</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- DEUTSCH VERSION -->
+    <div id="de" class="language-section">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">Funktionen</a>
+                    <a href="#fip">FIP-Partnerschaft</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">Dashboard</a>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Fortgeschrittene Plattform für digitale Marken</h2>
+                <p class="hero-subtitle">Die globale sichere Plattform zum Sammeln und Handeln digitaler Marken</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">Jetzt starten</button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">Mehr erfahren</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <h2>Hauptmerkmale</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Sichere Geldbörse</h3>
+                    <p>Vollständig sichere digitale Geldbörse mit hochstufiger Verschlüsselung und vollständiger Datenschutz</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Globaler Marktplatz</h3>
+                    <p>Tauschen Sie Marken mit Sammlern aus der ganzen Welt in einem sicheren und zuverlässigen Marktplatz</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Wertverfolgung</h3>
+                    <p>Verfolgen Sie den Wert Ihrer Sammlung und die Preishistorie mit fortgeschrittener Analytik</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>FIP-Standards</h3>
+                    <p>Entspricht den internationalen Standards der Federation Internationale de Philatélie</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Sichere Transfers</h3>
+                    <p>Sichere Peer-to-Peer-Transfers mit vollständiger Transaktionshistorie</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mehrsprachig</h3>
+                    <p>Mehrsprachige Schnittstelle: Arabisch, Englisch, Französisch, Deutsch, Spanisch, Chinesisch</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ Offizielle FIP-Partnerschaft</h3>
+                    <p>Die Stampcoin-Plattform entspricht den Standards der Federation Internationale de Philatélie (FIP), der weltweit führenden philatelistischen Organisation.</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>FIP-Standards beinhalten:</strong>
+                        <br>✓ Hochwertige Überprüfung
+                        <br>✓ Vereinheitlichte internationale Klassifizierungen
+                        <br>✓ Schutz seltener Marken
+                        <br>✓ Internationale Konservierungsstandards
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 FIP-Offizieller Webseite</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">Zertifiziert von<br>International FIP</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 Sicherheit und Zuverlässigkeit</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>256-Bit-Verschlüsselung</h3>
+                        <p>Höchste Stufe der Industrieverschlüsselung</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>2FA-Authentifizierung</h3>
+                        <p>Mehrstufige Authentifizierung</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>Vollständiges Transaktionslog</h3>
+                        <p>Vollständige Verfolgung aller Operationen</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>Echtheitsprüfung</h3>
+                        <p>Internationale Markenüberprüfung</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>24/7 Support</h3>
+                        <p>Rund-um-die-Uhr-Kundensupport</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>Vollständiges HTTPS</h3>
+                        <p>Immer verschlüsselte Verbindungen</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Über Stampcoin</h3>
+                    <a href="#features">Funktionen</a>
+                    <a href="#fip">FIP-Partnerschaft</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Ressourcen</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Kontakt</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP-Offiziell</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. Alle Rechte vorbehalten</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- CHINESE VERSION -->
+    <div id="zh" class="language-section">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">功能</a>
+                    <a href="#fip">FIP 合作</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">仪表板</a>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">先进的数字邮票平台</h2>
+                <p class="hero-subtitle">用于收集和交易数字邮票的全球安全平台</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">立即开始</button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">了解更多</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <h2>主要功能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>安全钱包</h3>
+                    <p>具有高级加密和完整隐私保护的完全安全的数字钱包</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>全球市场</h3>
+                    <p>在安全可靠的市场中与来自世界各地的收藏家交换邮票</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>价值跟踪</h3>
+                    <p>使用高级分析跟踪您的收藏价值和价格历史</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>FIP 标准</h3>
+                    <p>符合国际集邮联合会 (FIP) 的国际标准</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>安全转账</h3>
+                    <p>具有完整交易历史的安全点对点转账</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>多语言</h3>
+                    <p>多语言界面：阿拉伯语、英语、法语、德语、西班牙语、中文</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ 官方 FIP 合作</h3>
+                    <p>Stampcoin 平台遵守国际集邮联合会 (FIP) 的标准，FIP 是世界领先的集邮组织。</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>FIP 标准包括：</strong>
+                        <br>✓ 高质量验证
+                        <br>✓ 统一的国际分类
+                        <br>✓ 稀有邮票保护
+                        <br>✓ 国际保存标准
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 FIP 官方网站</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">由国际 FIP<br>认证</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 安全和可靠性</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>256 位加密</h3>
+                        <p>最高级别的工业级加密</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>2FA 身份验证</h3>
+                        <p>多因素身份验证</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>完整交易日志</h3>
+                        <p>所有操作的完整追踪</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>真实性验证</h3>
+                        <p>国际邮票验证</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>24/7 支持</h3>
+                        <p>全天候客户支持</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>完整 HTTPS</h3>
+                        <p>始终加密的连接</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于 Stampcoin</h3>
+                    <a href="#features">功能</a>
+                    <a href="#fip">FIP 合作</a>
+                </div>
+                <div class="footer-section">
+                    <h3>资源</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>联系方式</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP 官方</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. 版权所有</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SPANISH VERSION -->
+    <div id="es" class="language-section">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">Características</a>
+                    <a href="#fip">Asociación FIP</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">Panel</a>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Plataforma avanzada de sellos digitales</h2>
+                <p class="hero-subtitle">La plataforma segura global para coleccionar e intercambiar sellos digitales</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">Comenzar ahora</button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">Más información</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <h2>Características principales</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Cartera segura</h3>
+                    <p>Billetera digital completamente segura con cifrado de alto nivel y protección completa de privacidad</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Mercado global</h3>
+                    <p>Intercambie sellos con coleccionistas de todo el mundo en un mercado seguro y confiable</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Seguimiento de valor</h3>
+                    <p>Rastrear el valor de su colección e historial de precios con análisis avanzado</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Estándares FIP</h3>
+                    <p>Cumple con los estándares internacionales de la Federación Internacional de Filatelia</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Transferencias seguras</h3>
+                    <p>Transferencias seguras de igual a igual con historial completo de transacciones</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multilingüe</h3>
+                    <p>Interfaz multilingüe: árabe, inglés, francés, alemán, español, chino</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ Asociación oficial de FIP</h3>
+                    <p>La plataforma Stampcoin se adhiere a los estándares de la Federación Internacional de Filatelia (FIP), la organización filatélica líder mundial.</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>Los estándares de FIP incluyen:</strong>
+                        <br>✓ Verificación de alta calidad
+                        <br>✓ Clasificaciones internacionales unificadas
+                        <br>✓ Protección de sellos raros
+                        <br>✓ Estándares internacionales de conservación
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 Sitio web oficial de FIP</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">Certificado por<br>FIP Internacional</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 Seguridad y confiabilidad</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>Cifrado de 256 bits</h3>
+                        <p>Más alto nivel de cifrado industrial</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>Autenticación 2FA</h3>
+                        <p>Autenticación multifactor</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>Registro de transacciones completo</h3>
+                        <p>Seguimiento completo de todas las operaciones</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>Verificación de autenticidad</h3>
+                        <p>Verificación internacional de sellos</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>Soporte 24/7</h3>
+                        <p>Soporte al cliente las 24 horas</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>HTTPS completo</h3>
+                        <p>Conexiones siempre cifradas</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Acerca de Stampcoin</h3>
+                    <a href="#features">Características</a>
+                    <a href="#fip">Asociación FIP</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Recursos</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP Oficial</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. Todos los derechos reservados</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- FRENCH VERSION -->
+    <div id="fr" class="language-section">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-stamp">🏛️</span>
+                    <span>Stampcoin</span>
+                </div>
+                <nav>
+                    <a href="#features">Fonctionnalités</a>
+                    <a href="#fip">Partenariat FIP</a>
+                    <a href="#api">API</a>
+                    <a href="https://api.stampcoin.com" target="_blank">Tableau de bord</a>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🏛️ Stampcoin</h1>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Plateforme avancée de timbres numériques</h2>
+                <p class="hero-subtitle">La plateforme mondiale sécurisée pour collecter et échanger des timbres numériques</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="document.location='https://stampcoin.com/dashboard'">Commencer maintenant</button>
+                    <button class="btn btn-secondary" onclick="document.location='#fip'">En savoir plus</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <h2>Caractéristiques principales</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Portefeuille sécurisé</h3>
+                    <p>Portefeuille numérique complètement sécurisé avec chiffrement de haut niveau et protection complète de la vie privée</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Marché mondial</h3>
+                    <p>Échangez des timbres avec des collectionneurs du monde entier sur un marché sûr et fiable</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Suivi de la valeur</h3>
+                    <p>Suivre la valeur de votre collection et l'historique des prix avec des analyses avancées</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Normes FIP</h3>
+                    <p>Conforme aux normes internationales de la Fédération Internationale de Philatélie</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Transferts sécurisés</h3>
+                    <p>Transferts sécurisés pair à pair avec historique complet des transactions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multilingue</h3>
+                    <p>Interface multilingue : arabe, anglais, français, allemand, espagnol, chinois</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="fip" class="fip-partnership">
+            <div class="fip-content">
+                <div class="fip-text">
+                    <h3>🏛️ Partenariat officiel FIP</h3>
+                    <p>La plateforme Stampcoin adhère aux normes de la Fédération Internationale de Philatélie (FIP), l'organisation philatélique mondiale leader.</p>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        <strong>Les normes FIP incluent:</strong>
+                        <br>✓ Vérification de haute qualité
+                        <br>✓ Classifications internationales unifiées
+                        <br>✓ Protection des timbres rares
+                        <br>✓ Normes internationales de conservation
+                    </p>
+                    <a href="https://fip.org" target="_blank" class="fip-link">🔗 Site officiel FIP</a>
+                </div>
+                <div class="fip-badge">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                    <div style="color: #1a237e; font-weight: bold; font-size: 1.2rem;">Certifié par<br>FIP International</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="security">
+            <div class="security-content">
+                <h2>🔒 Sécurité et fiabilité</h2>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🔐</div>
+                        <h3>Chiffrement 256 bits</h3>
+                        <p>Plus haut niveau de chiffrement industriel</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🛡️</div>
+                        <h3>Authentification 2FA</h3>
+                        <p>Authentification multifacteur</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📋</div>
+                        <h3>Journal complet des transactions</h3>
+                        <p>Suivi complet de toutes les opérations</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">✅</div>
+                        <h3>Vérification d'authenticité</h3>
+                        <p>Vérification internationale des timbres</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">📞</div>
+                        <h3>Support 24/7</h3>
+                        <p>Support client 24h/24</p>
+                    </div>
+                    <div class="security-item">
+                        <div style="font-size: 2rem;">🌐</div>
+                        <h3>HTTPS complet</h3>
+                        <p>Connexions toujours chiffrées</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>À propos de Stampcoin</h3>
+                    <a href="#features">Fonctionnalités</a>
+                    <a href="#fip">Partenariat FIP</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Ressources</h3>
+                    <a href="https://github.com/zedanazad43/stp" target="_blank">GitHub Repository</a>
+                    <a href="https://api.stampcoin.com" target="_blank">API Endpoint</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <a href="mailto:info@stampcoin.com">info@stampcoin.com</a>
+                    <a href="https://fip.org" target="_blank">🔗 FIP Officiel</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Stampcoin Platform. Tous droits réservés</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            // Hide all language sections
+            const sections = document.querySelectorAll('.language-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show selected language section
+            document.getElementById(lang).classList.add('active');
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.lang-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Change page direction based on language
+            if (lang === 'ar') {
+                document.documentElement.dir = 'rtl';
+                document.documentElement.lang = 'ar';
+            } else {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = lang;
+            }
+        }
+    </script>
+</body>
+</html>

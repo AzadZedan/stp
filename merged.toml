@@ -1,24 +1,2 @@
-# Merged TOML Files
-
-# mcp.toml
-...existing content...
-
-# fly.toml
-...existing content...
-
-# stampcoin-platform\mcp.toml
-...existing content...
-
-# stampcoin-platform\todo-sync-backend_fly_Version2.toml
-...existing content...
-
-# git\contrib\libgit-rs\Cargo.toml
-...existing content...
-
-# git\contrib\libgit-sys\Cargo.toml
-...existing content...
-
-# git\Cargo.toml
-...existing content...
-
-# End of merged TOML files.
+bundle = "artifacts/merged/extensions/toml.merged.txt"
+command = "npm run merge:repo"

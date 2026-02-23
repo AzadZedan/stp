@@ -1,29 +1,4 @@
-// Merged JSON Files
-
-// package.json
-...existing content...
-
-// railway.json
-...existing content...
-
-// vercel.json
-...existing content...
-
-// tsconfig.json
-...existing content...
-
-// src/ai-agent-expert/config.json
-...existing content...
-
-// json/data.json
-...existing content...
-
-// locales/en.json
-...existing content...
-
-// locales/ar.json
-...existing content...
-
-// (Other .json files omitted for brevity)
-
-// End of merged JSON files.
+{
+  "generatedBundle": "artifacts/merged/extensions/json.merged.txt",
+  "command": "npm run merge:repo"
+}

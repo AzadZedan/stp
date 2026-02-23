@@ -1,0 +1,3386 @@
+# Merged extension: .js
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 25
+
+
+
+===== FILE: json/lib_prisma_Version2.js =====
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+module.exports = prisma;
+
+
+===== FILE: json/market.js =====
+/**
+ * Market Institution Module (مؤسسة السوق)
+ * Digital marketplace for stamps and collectibles
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const MARKET_FILE = path.join(__dirname, "market-data.json");
+
+// Initialize market data structure
+let marketData = {
+  items: [],
+  transactions: []
+};
+
+// Load market data from file
+function loadMarketData() {
+  try {
+    if (fs.existsSync(MARKET_FILE)) {
+      const raw = fs.readFileSync(MARKET_FILE, "utf8");
+      marketData = JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error("Error loading market data:", e.message);
+  }
+}
+
+// Save market data to file
+function saveMarketData() {
+  try {
+    fs.writeFileSync(MARKET_FILE, JSON.stringify(marketData, null, 2), "utf8");
+    return true;
+  } catch (e) {
+    console.error("Error saving market data:", e.message);
+    return false;
+  }
+}
+
+// Initialize on module load
+loadMarketData();
+
+/**
+ * Add a new item to the market
+ */
+function addMarketItem(sellerId, item) {
+  if (!sellerId || !item || !item.name) {
+    throw new Error("sellerId and item with name are required");
+  }
+
+  const newItem = {
+    id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    sellerId,
+    name: item.name,
+    description: item.description || "",
+    price: item.price || 0,
+    type: item.type || "stamp",
+    imageUrl: item.imageUrl || "",
+    status: "available",
+    listedAt: new Date().toISOString()
+  };
+
+  marketData.items.push(newItem);
+  saveMarketData();
+  return newItem;
+}
+
+/**
+ * Get all market items
+ */
+function getAllMarketItems(filter = {}) {
+  let items = [...marketData.items];
+
+  // Filter by status
+  if (filter.status) {
+    items = items.filter(item => item.status === filter.status);
+  }
+
+  // Filter by type
+  if (filter.type) {
+    items = items.filter(item => item.type === filter.type);
+  }
+
+  // Filter by seller
+  if (filter.sellerId) {
+    items = items.filter(item => item.sellerId === filter.sellerId);
+  }
+
+  return items;
+}
+
+/**
+ * Get a specific market item by ID
+ */
+function getMarketItem(itemId) {
+  const item = marketData.items.find(i => i.id === itemId);
+  if (!item) {
+    throw new Error("Market item not found");
+  }
+  return item;
+}
+
+/**
+ * Update a market item
+ */
+function updateMarketItem(itemId, updates) {
+  const itemIndex = marketData.items.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) {
+    throw new Error("Market item not found");
+  }
+
+  const item = marketData.items[itemIndex];
+  
+  // Allow updating specific fields
+  if (updates.price !== undefined) item.price = updates.price;
+  if (updates.description !== undefined) item.description = updates.description;
+  if (updates.status !== undefined) item.status = updates.status;
+  if (updates.imageUrl !== undefined) item.imageUrl = updates.imageUrl;
+
+  marketData.items[itemIndex] = item;
+  saveMarketData();
+  return item;
+}
+
+/**
+ * Purchase an item from the market
+ */
+function purchaseMarketItem(itemId, buyerId) {
+  const item = getMarketItem(itemId);
+
+  if (item.status !== "available") {
+    throw new Error("Item is not available for purchase");
+  }
+
+  if (item.sellerId === buyerId) {
+    throw new Error("Cannot purchase your own item");
+  }
+
+  // Mark item as sold
+  updateMarketItem(itemId, { status: "sold" });
+
+  // Record transaction
+  const transaction = {
+    id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    itemId,
+    sellerId: item.sellerId,
+    buyerId,
+    price: item.price,
+    timestamp: new Date().toISOString()
+  };
+
+  marketData.transactions.push(transaction);
+  saveMarketData();
+
+  return {
+    transaction,
+    item
+  };
+}
+
+/**
+ * Remove an item from the market
+ */
+function removeMarketItem(itemId, userId) {
+  const itemIndex = marketData.items.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) {
+    throw new Error("Market item not found");
+  }
+
+  const item = marketData.items[itemIndex];
+  
+  // Only the seller can remove their item
+  if (item.sellerId !== userId) {
+    throw new Error("Only the seller can remove this item");
+  }
+
+  marketData.items.splice(itemIndex, 1);
+  saveMarketData();
+  return { success: true, message: "Item removed from market" };
+}
+
+/**
+ * Get transaction history
+ */
+function getMarketTransactions(filter = {}) {
+  let transactions = [...marketData.transactions];
+
+  if (filter.buyerId) {
+    transactions = transactions.filter(t => t.buyerId === filter.buyerId);
+  }
+
+  if (filter.sellerId) {
+    transactions = transactions.filter(t => t.sellerId === filter.sellerId);
+  }
+
+  return transactions;
+}
+
+module.exports = {
+  addMarketItem,
+  getAllMarketItems,
+  getMarketItem,
+  updateMarketItem,
+  purchaseMarketItem,
+  removeMarketItem,
+  getMarketTransactions
+};
+
+
+===== FILE: json/server.js =====
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+require('dotenv').config();
+
+const app = express();
+
+// إعداد الأمان
+app.use(helmet());
+app.use(cors());
+
+// تقييد طلبات API
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 دقيقة
+  max: 100 // الحد الأقصى للطلبات لكل IP
+});
+app.use('/api/', limiter);
+
+// ضغط الاستجابات
+app.use(compression());
+
+// تسجيل الطلبات
+app.use(morgan('combined'));
+
+// تحليل البيانات
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// خدمة الملفات الثابتة
+app.use(express.static(path.join(__dirname, 'public')));
+
+// الاتصال بقاعدة البيانات
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/stampcoin', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('تم الاتصال بقاعدة البيانات'))
+.catch(err => console.error('فشل الاتصال بقاعدة البيانات:', err));
+
+// تعريف المخططات والنماذج
+const StampSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String },
+  category: { type: String, required: true },
+  estimatedValue: { type: Number, required: true },
+  currency: { type: String, default: 'stp' },
+  imageUrl: { type: String },
+  nftAddress: { type: String },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  walletAddress: { type: String },
+  balance: { type: Number, default: 0 },
+  notifications: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const TransactionSchema = new mongoose.Schema({
+  type: { type: String, required: true }, // buy, sell, transfer
+  amount: { type: Number, required: true },
+  currency: { type: String, default: 'stp' },
+  from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  stamp: { type: mongoose.Schema.Types.ObjectId, ref: 'Stamp' },
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const InvestmentPlanSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  duration: { type: String, required: true },
+  minInvestment: { type: Number, required: true },
+  maxInvestment: { type: Number, required: true },
+  returnRate: { type: Number, required: true },
+  description: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// إنشاء النماذج
+const Stamp = mongoose.model('Stamp', StampSchema);
+const User = mongoose.model('User', UserSchema);
+const Transaction = mongoose.model('Transaction', TransactionSchema);
+const InvestmentPlan = mongoose.model('InvestmentPlan', InvestmentPlanSchema);
+
+// API Routes
+app.get('/api', (req, res) => {
+  res.json({ message: 'مرحباً بك في واجهة برمجة تطبيقات منصة ستامكوين' });
+});
+
+// API للمحافظ
+app.get('/api/wallets', async (req, res) => {
+  try {
+    const wallets = await User.find({}, 'username email walletAddress balance');
+    res.json(wallets);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب المحافظ', error: err });
+  }
+});
+
+app.get('/api/wallets/:userId', async (req, res) => {
+  try {
+    const wallet = await User.findById(req.params.userId);
+    if (!wallet) {
+      return res.status(404).json({ message: 'المحفظة غير موجودة' });
+    }
+    res.json(wallet);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب المحفظة', error: err });
+  }
+});
+
+// API للطوابع
+app.get('/api/stamps', async (req, res) => {
+  try {
+    const stamps = await Stamp.find();
+    res.json(stamps);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب الطوابع', error: err });
+  }
+});
+
+app.post('/api/stamps', async (req, res) => {
+  try {
+    const stamp = new Stamp(req.body);
+    await stamp.save();
+    res.status(201).json(stamp);
+  } catch (err) {
+    res.status(400).json({ message: 'خطأ في إنشاء الطابع', error: err });
+  }
+});
+
+// API للمعاملات
+app.get('/api/transactions', async (req, res) => {
+  try {
+    const transactions = await Transaction.find().populate('from to stamp');
+    res.json(transactions);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب المعاملات', error: err });
+  }
+});
+
+// API للخطط الاستثمارية
+app.get('/api/investment-plans', async (req, res) => {
+  try {
+    const plans = await InvestmentPlan.find();
+    res.json(plans);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب الخطط الاستثمارية', error: err });
+  }
+});
+
+// API للطوابع المشهورة
+app.get('/api/famous-stamps', async (req, res) => {
+  try {
+    const famousStamps = await Stamp.find({ category: 'famous' }).sort('estimatedValue').limit(10);
+    res.json(famousStamps);
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في جلب الطوابع المشهورة', error: err });
+  }
+});
+
+// بدء الخادم
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`يعمل الخادم على المنفط ${PORT}`);
+});
+
+
+===== FILE: json/todo-app___tests___app.test_Version2.js =====
+const fs = require("fs");
+test("package.json exists in todo-app", () => {
+  const exists = fs.existsSync("todo-app/package.json");
+  expect(exists).toBe(true);
+});
+
+
+===== FILE: json/todo-sync-backend_server_Version2.js =====
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const DATA_FILE = path.join(__dirname, "data.json");
+const SYNC_TOKEN = process.env.SYNC_TOKEN || "";
+
+function readData() {
+  try {
+    const raw = fs.readFileSync(DATA_FILE, "utf8");
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+function writeData(todos) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(todos, null, 2), "utf8");
+    return true;
+  } catch (e) {
+    console.error("Write error:", e);
+    return false;
+  }
+}
+
+function requireToken(req, res, next) {
+  const auth = req.get("Authorization") || "";
+  const token = auth.replace(/^Bearer\s+/i, "");
+  if (!SYNC_TOKEN || token !== SYNC_TOKEN) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+}
+
+app.get("/sync", requireToken, (req, res) => {
+  const todos = readData();
+  res.json({ todos });
+});
+
+app.post("/sync", requireToken, (req, res) => {
+  const payload = req.body;
+  if (!payload || !Array.isArray(payload.todos)) {
+    return res.status(400).json({ error: "Invalid payload, expected { todos: [...] }" });
+  }
+  const ok = writeData(payload.todos);
+  if (!ok) return res.status(500).json({ error: "Failed to store data" });
+  res.json({ ok: true });
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`todo-sync-backend listening on port ${port}`);
+});
+
+
+===== FILE: json/wallet.js =====
+// Digital Wallet Module for Stampcoin Platform
+// Module for managing digital wallets, balances, and transactions
+
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const WALLETS_FILE = path.join(__dirname, 'wallets.json');
+const TRANSACTIONS_FILE = path.join(__dirname, 'transactions.json');
+
+/**
+ * Initialize wallet storage files if they don't exist
+ */
+function initializeStorage() {
+  if (!fs.existsSync(WALLETS_FILE)) {
+    fs.writeFileSync(WALLETS_FILE, JSON.stringify({}, null, 2), 'utf8');
+  }
+  if (!fs.existsSync(TRANSACTIONS_FILE)) {
+    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify([], null, 2), 'utf8');
+  }
+}
+
+/**
+ * Read wallets from storage
+ */
+function readWallets() {
+  try {
+    const data = fs.readFileSync(WALLETS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    // Only return empty object if file doesn't exist
+    if (error.code === 'ENOENT') {
+      return {};
+    }
+    // Re-throw other errors (invalid JSON, permissions, etc.)
+    console.error('Error reading wallets:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Write wallets to storage
+ */
+function writeWallets(wallets) {
+  try {
+    fs.writeFileSync(WALLETS_FILE, JSON.stringify(wallets, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing wallets:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Read transactions from storage
+ */
+function readTransactions() {
+  try {
+    const data = fs.readFileSync(TRANSACTIONS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    // Only return empty array if file doesn't exist
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    // Re-throw other errors (invalid JSON, permissions, etc.)
+    console.error('Error reading transactions:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Write transactions to storage
+ */
+function writeTransactions(transactions) {
+  try {
+    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(transactions, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing transactions:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Create a new wallet for a user
+ * @param {string} userId - Unique user identifier
+ * @param {string} userName - User's display name
+ * @returns {object} The created wallet object
+ */
+function createWallet(userId, userName) {
+  const wallets = readWallets();
+  
+  if (wallets[userId]) {
+    throw new Error('Wallet already exists for this user');
+  }
+
+  const wallet = {
+    userId,
+    userName,
+    balance: 0,
+    stamps: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Get wallet by user ID
+ * @param {string} userId - User identifier
+ * @returns {object|null} Wallet object or null if not found
+ */
+function getWallet(userId) {
+  const wallets = readWallets();
+  return wallets[userId] || null;
+}
+
+/**
+ * Get all wallets
+ * @returns {object} All wallets
+ */
+function getAllWallets() {
+  return readWallets();
+}
+
+/**
+ * Update wallet balance
+ * @param {string} userId - User identifier
+ * @param {number} amount - Amount to add (positive) or subtract (negative)
+ * @returns {object} Updated wallet
+ */
+function updateBalance(userId, amount) {
+  // Prevent prototype-polluting or otherwise invalid user identifiers
+  if (
+    typeof userId !== 'string' ||
+    userId === '__proto__' ||
+    userId === 'constructor' ||
+    userId === 'prototype'
+  ) {
+    throw new Error('Invalid userId');
+  }
+
+  const wallets = readWallets();
+  const wallet = wallets[userId];
+  
+  if (!wallet) {
+    throw new Error('Wallet not found');
+  }
+
+  const newBalance = wallet.balance + amount;
+  if (newBalance < 0) {
+    throw new Error('Insufficient balance');
+  }
+
+  wallet.balance = newBalance;
+  wallet.updatedAt = new Date().toISOString();
+  
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Add a stamp to wallet
+ * @param {string} userId - User identifier
+ * @param {object} stamp - Stamp object to add
+ * @returns {object} Updated wallet
+ */
+function addStamp(userId, stamp) {
+  const wallets = readWallets();
+  const wallet = wallets[userId];
+  
+  if (!wallet) {
+    throw new Error('Wallet not found');
+  }
+
+  const stampWithId = {
+    id: crypto.randomUUID(),
+    ...stamp,
+    addedAt: new Date().toISOString()
+  };
+
+  wallet.stamps.push(stampWithId);
+  wallet.updatedAt = new Date().toISOString();
+  
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Transfer stamps or balance between wallets
+ * @param {string} fromUserId - Sender's user ID
+ * @param {string} toUserId - Receiver's user ID
+ * @param {number} amount - Amount to transfer (must be positive if transferring balance)
+ * @param {string} stampId - Stamp ID to transfer (optional)
+ * @returns {object} Transaction record
+ */
+function transfer(fromUserId, toUserId, amount = 0, stampId = null) {
+  // Validate that either amount or stampId is provided
+  if (!stampId && (!amount || amount <= 0)) {
+    throw new Error('Transfer amount must be a positive number when transferring balance');
+  }
+  
+  const wallets = readWallets();
+  const fromWallet = wallets[fromUserId];
+  const toWallet = wallets[toUserId];
+  
+  if (!fromWallet || !toWallet) {
+    throw new Error('One or both wallets not found');
+  }
+
+  const transactionId = crypto.randomUUID();
+  const timestamp = new Date().toISOString();
+
+  // Transfer balance
+  if (amount > 0) {
+    if (fromWallet.balance < amount) {
+      throw new Error('Insufficient balance');
+    }
+    fromWallet.balance -= amount;
+    toWallet.balance += amount;
+  }
+
+  // Transfer stamp
+  if (stampId) {
+    const stampIndex = fromWallet.stamps.findIndex(s => s.id === stampId);
+    if (stampIndex === -1) {
+      throw new Error('Stamp not found in sender wallet');
+    }
+    const stamp = fromWallet.stamps.splice(stampIndex, 1)[0];
+    toWallet.stamps.push({
+      ...stamp,
+      transferredAt: timestamp
+    });
+  }
+
+  // Update timestamps
+  fromWallet.updatedAt = timestamp;
+  toWallet.updatedAt = timestamp;
+  
+  wallets[fromUserId] = fromWallet;
+  wallets[toUserId] = toWallet;
+  writeWallets(wallets);
+
+  // Record transaction
+  const transaction = {
+    id: transactionId,
+    from: fromUserId,
+    to: toUserId,
+    amount,
+    stampId,
+    timestamp,
+    status: 'completed'
+  };
+
+  const transactions = readTransactions();
+  transactions.push(transaction);
+  writeTransactions(transactions);
+
+  return transaction;
+}
+
+/**
+ * Get transaction history for a user
+ * @param {string} userId - User identifier
+ * @returns {array} Array of transactions
+ */
+function getTransactionHistory(userId) {
+  const transactions = readTransactions();
+  return transactions.filter(t => t.from === userId || t.to === userId);
+}
+
+/**
+ * Get all transactions
+ * @returns {array} Array of all transactions
+ */
+function getAllTransactions() {
+  return readTransactions();
+}
+
+// Initialize storage on module load
+initializeStorage();
+
+module.exports = {
+  createWallet,
+  getWallet,
+  getAllWallets,
+  updateBalance,
+  addStamp,
+  transfer,
+  getTransactionHistory,
+  getAllTransactions
+};
+
+
+===== FILE: lib/lib_prisma_Version2.js =====
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+module.exports = prisma;
+
+
+===== FILE: main.js =====
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
+
+const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// General middleware
+app.use(compression());
+app.use(morgan('combined'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Import AI Agent Expert - disabled for now
+const fs = require("fs");
+const path = require("path");
+const aiAgentPath = path.join(__dirname, "src/ai-agent-expert/index.js");
+if (false && fs.existsSync(aiAgentPath)) {
+  // Dynamically import the AI Agent Expert to avoid issues if it doesn't exist
+  const aiAgent = require(aiAgentPath);
+
+  // Mount AI Agent Expert routes directly
+  app.use("/agent", aiAgent);
+  console.log("AI Agent Expert mounted successfully");
+} else {
+  console.warn("AI Agent Expert disabled or not found at:", aiAgentPath);
+}
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/stampcoin-platform', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
+
+// Basic route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Stampcoin Platform API',
+    version: '1.0.0',
+    documentation: 'https://github.com/zedanazad43/stp'
+  });
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    service: "Stampcoin Platform",
+    version: "1.0.0"
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found'
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Stampcoin Platform server listening on port ${PORT}`);
+});
+
+
+===== FILE: market.js =====
+/**
+ * Market Institution Module (مؤسسة السوق)
+ * Digital marketplace for stamps and collectibles
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const MARKET_FILE = path.join(__dirname, "market-data.json");
+
+// Initialize market data structure
+let marketData = {
+  items: [],
+  transactions: []
+};
+
+// Load market data from file
+function loadMarketData() {
+  try {
+    if (fs.existsSync(MARKET_FILE)) {
+      const raw = fs.readFileSync(MARKET_FILE, "utf8");
+      marketData = JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error("Error loading market data:", e.message);
+  }
+}
+
+// Save market data to file
+function saveMarketData() {
+  try {
+    fs.writeFileSync(MARKET_FILE, JSON.stringify(marketData, null, 2), "utf8");
+    return true;
+  } catch (e) {
+    console.error("Error saving market data:", e.message);
+    return false;
+  }
+}
+
+// Initialize on module load
+loadMarketData();
+
+/**
+ * Add a new item to the market
+ */
+function addMarketItem(sellerId, item) {
+  if (!sellerId || !item || !item.name) {
+    throw new Error("sellerId and item with name are required");
+  }
+
+  const newItem = {
+    id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    sellerId,
+    name: item.name,
+    description: item.description || "",
+    price: item.price || 0,
+    type: item.type || "stamp",
+    imageUrl: item.imageUrl || "",
+    status: "available",
+    listedAt: new Date().toISOString()
+  };
+
+  marketData.items.push(newItem);
+  saveMarketData();
+  return newItem;
+}
+
+/**
+ * Get all market items
+ */
+function getAllMarketItems(filter = {}) {
+  let items = [...marketData.items];
+
+  // Filter by status
+  if (filter.status) {
+    items = items.filter(item => item.status === filter.status);
+  }
+
+  // Filter by type
+  if (filter.type) {
+    items = items.filter(item => item.type === filter.type);
+  }
+
+  // Filter by seller
+  if (filter.sellerId) {
+    items = items.filter(item => item.sellerId === filter.sellerId);
+  }
+
+  return items;
+}
+
+/**
+ * Get a specific market item by ID
+ */
+function getMarketItem(itemId) {
+  const item = marketData.items.find(i => i.id === itemId);
+  if (!item) {
+    throw new Error("Market item not found");
+  }
+  return item;
+}
+
+/**
+ * Update a market item
+ */
+function updateMarketItem(itemId, updates) {
+  const itemIndex = marketData.items.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) {
+    throw new Error("Market item not found");
+  }
+
+  const item = marketData.items[itemIndex];
+  
+  // Allow updating specific fields
+  if (updates.price !== undefined) item.price = updates.price;
+  if (updates.description !== undefined) item.description = updates.description;
+  if (updates.status !== undefined) item.status = updates.status;
+  if (updates.imageUrl !== undefined) item.imageUrl = updates.imageUrl;
+
+  marketData.items[itemIndex] = item;
+  saveMarketData();
+  return item;
+}
+
+/**
+ * Purchase an item from the market
+ */
+function purchaseMarketItem(itemId, buyerId) {
+  const item = getMarketItem(itemId);
+
+  if (item.status !== "available") {
+    throw new Error("Item is not available for purchase");
+  }
+
+  if (item.sellerId === buyerId) {
+    throw new Error("Cannot purchase your own item");
+  }
+
+  // Mark item as sold
+  updateMarketItem(itemId, { status: "sold" });
+
+  // Record transaction
+  const transaction = {
+    id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    itemId,
+    sellerId: item.sellerId,
+    buyerId,
+    price: item.price,
+    timestamp: new Date().toISOString()
+  };
+
+  marketData.transactions.push(transaction);
+  saveMarketData();
+
+  return {
+    transaction,
+    item
+  };
+}
+
+/**
+ * Remove an item from the market
+ */
+function removeMarketItem(itemId, userId) {
+  const itemIndex = marketData.items.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) {
+    throw new Error("Market item not found");
+  }
+
+  const item = marketData.items[itemIndex];
+  
+  // Only the seller can remove their item
+  if (item.sellerId !== userId) {
+    throw new Error("Only the seller can remove this item");
+  }
+
+  marketData.items.splice(itemIndex, 1);
+  saveMarketData();
+  return { success: true, message: "Item removed from market" };
+}
+
+/**
+ * Get transaction history
+ */
+function getMarketTransactions(filter = {}) {
+  let transactions = [...marketData.transactions];
+
+  if (filter.buyerId) {
+    transactions = transactions.filter(t => t.buyerId === filter.buyerId);
+  }
+
+  if (filter.sellerId) {
+    transactions = transactions.filter(t => t.sellerId === filter.sellerId);
+  }
+
+  return transactions;
+}
+
+module.exports = {
+  addMarketItem,
+  getAllMarketItems,
+  getMarketItem,
+  updateMarketItem,
+  purchaseMarketItem,
+  removeMarketItem,
+  getMarketTransactions
+};
+
+
+===== FILE: merged.js =====
+/*
+ * Merged JavaScript output moved to artifacts/merged/extensions/js.merged.txt
+ * Generate/update with: npm run merge:repo
+ */
+module.exports = {
+  generatedBundle: "artifacts/merged/extensions/js.merged.txt"
+};
+
+
+===== FILE: scripts/check-syntax.js =====
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = process.cwd();
+const EXCLUDED_DIRS = new Set([".git", "node_modules", "actions-runner", "git", "dist", "artifacts"]);
+
+function shouldSkip(relPath) {
+  return relPath.split(path.sep).some((part) => EXCLUDED_DIRS.has(part));
+}
+
+function walk(dir, out = []) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    const rel = path.relative(ROOT, full);
+    if (shouldSkip(rel)) continue;
+
+    if (entry.isDirectory()) {
+      walk(full, out);
+    } else if (entry.isFile() && full.endsWith(".js")) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+const files = walk(ROOT).sort();
+const failures = [];
+
+for (const file of files) {
+  try {
+    execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+  } catch (error) {
+    failures.push({ file, message: String(error.stderr || error.message) });
+  }
+}
+
+if (failures.length > 0) {
+  console.error("Syntax check failed:");
+  for (const f of failures) {
+    console.error(`- ${path.relative(ROOT, f.file)}\n${f.message}`);
+  }
+  process.exit(1);
+}
+
+console.log(`Syntax check passed for ${files.length} JavaScript files.`);
+
+
+===== FILE: scripts/create-contracts.js =====
+const { ethers } = require('ethers');
+require('dotenv').config();
+
+async function createContracts(options) {
+  try {
+    console.log('جاري إنشاء العقود الذكية...');
+
+    // تهيئة موفر الويب
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL || 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY');
+
+    // تهيئة المحفظة
+    const wallet = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
+    console.log('عنوان المحفظة:', wallet.address);
+
+    // قراءة ABI و bytecode للعقود
+    const contractPath = './contracts/StampNFT.sol';
+    if (!fs.existsSync(contractPath)) {
+      throw new Error('ملف العقد الذكي غير موجود');
+    }
+
+    // في التطبيق الحقيقي، سيتم قراءة ABI و bytecode من ملفات Solidity
+    // هنا سنستخدم بيانات وهمية للتوضيح
+    const stampNFTABI = [
+      "function mint(address to, string memory tokenURI) public returns (uint256)",
+      "function tokenURI(uint256 tokenId) public view returns (string memory)",
+      "function balanceOf(address owner) public view returns (uint256)",
+      "function ownerOf(uint256 tokenId) public view returns (address)"
+    ];
+
+    const stampNFTBytecode = "0x608060405234801561001057600080fd5b5061018f8061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c806360fe47b1146100465780636352211e146100645780636c0360eb14610082575b600080fd5b61004e6100a6565b60405161005b91906100f4565b60405180910390f35b61007e600480360381019061007991901016100de565b6100ac565b005b61000861011e565b60405161001591906100f4565b60405180910390f35b60008054905090565b60008054905090565b60008135905061003881610133565b92915050565b60006020828403121561005557610054610124565b5b600061006384828501610029565b91505092915050565b6000806040838503121561008357610082610124565b5b600061009185828601610029565b92505060206100a285828601610029565b9150509250929050565b6000806000606084860312156100c6576100c5610124565b5b60006100d486828701610029565b93505060206100e586828701610029565b92505060406100f686828701610029565b9150509250925092565b60006101098261011e565b9050919050565b61011981610104565b82525050565b60006020820190506101346000830184610110565b92915050565b6000819050919050565b61014d8161013a565b82525050565b60006020820190506101686000830184610144565b92915050565b6000819050919050565b6000610181610174565b9050919050565b600061019382610178565b9050919050565b60006101a582610198565b9050919050565b60006101b7826101aa565b9050919050565b60006101c9826101bc565b9050919050565b60006101db826101d6565b9050919050565b60006101ed826101e0565b9050919050565b60006101ff826101fa565b9050919050565b600061021182610204565b9050919050565b600061022382610216565b9050919050565b600061023582610230565b9050919050565b600061024782610242565b9050919050565b600061025982610254565b9050919050565b600061026b82610266565b9050919050565b600061027d82610278565b9050919050565b600061028f8261028a565b9050919050565b60006102a182610294565b9050919050565b60006102b3826102b6565b9050919050565b60006102c5826102c0565b9050919050565b60006102d7826102da565b9050919050565b60006102e9826102e4565b9050919050565b60006102fb826102f6565b9050919050565b600061030d82610308565b9050919050565b600061031f8261031a565b9050919050565b600061033182610334565b9050919050565b600061034382610346565b9050919050565b600061035582610358565b9050919050565b60006103678261036a565b9050919050565b60006103798261037c565b9050919050565b600061038b8261038e565b9050919050565b600061039d826103a0565b9050919050565b60006103af826103b2565b9050919050565b60";
+
+    // إنشاء مثيل العقد
+    const StampNFTFactory = new ethers.ContractFactory(stampNFTABI, stampNFTBytecode, wallet);
+    const stampNFTContract = await StampNFTFactory.deploy();
+    await stampNFTContract.deployed();
+
+    console.log('تم نشر عقد StampNFT:', stampNFTContract.address);
+
+    // إنشاء عقد التداول
+    const tradingABI = [
+      "function listToken(uint256 tokenId, uint256 price) public",
+      "function buyToken(uint256 tokenId) public payable",
+      "function cancelListing(uint256 tokenId) public",
+      "function getListings() public view returns (uint256, uint256, address)[]"
+    ];
+
+    const tradingBytecode = "0x608060405234801561001057600080fd5b5061018f8061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c806360fe47b1146100465780636352211e146100645780636c0360eb14610082575b600080fd5b61004e6100a6565b60405161005b91906100f4565b60405180910390f35b61007e600480360381019061007991901016100de565b6100ac565b005b61000861011e565b60405161001591906100f4565b60405180910390f35b60008054905090565b60008054905090565b60008135905061003881610133565b92915050565b60006020828403121561005557610054610124565b5b600061006384828501610029565b91505092915050565b6000806040838503121561008357610082610124565b5b600061009185828601610029565b92505060206100a285828601610029565b9150509250929050565b6000806000606084860312156100c6576100c5610124565b5b60006100d486828701610029565b93505060206100e586828701610029565b92505060406100f686828701610029565b9150509250925092565b60006101098261011e565b9050919050565b61011981610104565b82525050565b60006020820190506101346000830184610110565b92915050565b6000819050919050565b61014d8161013a565b82525050565b60006020820190506101686000830184610144565b92915050565b6000819050919050565b6000610181610174565b9050919050565b600061019382610178565b9050919050565b60006101a582610198565b9050919050565b60006101b7826101aa565b9050919050565b60006101c9826101bc565b9050919050565b60006101db826101d6565b9050919050565b60006101ed826101e0565b9050919050565b60006101ff826101fa565b9050919050565b600061021182610204565b9050919050565b600061022382610216565b9050919050565b600061023582610230565b9050919050565b600061024782610242565b9050919050565b600061025982610254565b9050919050565b600061026b82610266565b9050919050565b600061027d82610278565b9050919050565b600061028f8261028a565b9050919050565b60006102a182610294565b9050919050565b60006102b3826102b6565b9050919050565b60006102c5826102c0565b9050919050565b60006102d7826102da565b9050919050565b60006102e9826102e4565b9050919050565b60006102fb826102f6565b9050919050565b600061030d82610308565b9050919050565b600061031f8261031a565b9050919050565b600061033182610334565b9050919050565b600061034382610346565b9050919050565b600061035582610358565b9050919050565b60006103678261036a565b9050919050565b60006103798261037c565b9050919050565b600061038b8261038e565b9050919050565b600061039d826103a0565b9050919050565b60006103af826103b2565b9050919050565b6";
+
+    const TradingFactory = new ethers.ContractFactory(tradingABI, tradingBytecode, wallet);
+    const tradingContract = await TradingFactory.deploy(stampNFTContract.address);
+    await tradingContract.deployed();
+
+    console.log('تم نشر عقد التداول:', tradingContract.address);
+
+    // حفظ عناوين العقود في ملف
+    const contractsData = {
+      stampNFT: stampNFTContract.address,
+      trading: tradingContract.address,
+      timestamp: new Date().toISOString()
+    };
+
+    fs.writeFileSync('./contracts/addresses.json', JSON.stringify(contractsData, null, 2));
+
+    // إعداد العقود مع عناوين الحسابات المطلوبة
+    if (options.metamask) {
+      // إعداد MetaMask
+      console.log('إعداد MetaMask:', options.metamask);
+      // هنا سيتم إضافة منطق ربط MetaMask
+    }
+
+    if (options.cexio) {
+      console.log('إعداد CEX.IO:', options.cexio);
+      // هنا سيتم إضافة منطق ربط CEX.IO
+    }
+
+    if (options.mexc) {
+      console.log('إعداد MEXC:', options.mexc);
+      // هنا سيتم إضافة منطق ربط MEXC
+    }
+
+    if (options.kukoin) {
+      console.log('إعداد KuKoin:', options.kukoin);
+      // هنا سيتم إضافة منطق ربط KuKoin
+    }
+
+    return { success: true, contracts: contractsData };
+  } catch (error) {
+    console.error('خطأ في إنشاء العقود الذكية:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+// استدعاء الدالة مع معلمات من سطر الأوامر
+const options = {
+  metamask: process.argv[2] || '',
+  cexio: process.argv[3] || '',
+  mexc: process.argv[4] || '',
+  kukoin: process.argv[5] || ''
+};
+
+createContracts(options)
+  .then(result => {
+    if (!result.success) {
+      process.exit(1);
+    }
+  })
+  .catch(error => {
+    console.error('حدث خطأ:', error);
+    process.exit(1);
+  });
+
+
+===== FILE: scripts/create-famous-stamps-section.js =====
+const fs = require('fs');
+const path = require('path');
+const { MongoClient } = require('mongodb');
+require('dotenv').config();
+
+async function createFamousStampsSection(databasePath) {
+  try {
+    console.log('جاري إنشاء قسم الطوابع المشهورة...');
+
+    // الاتصال بقاعدة MongoDB
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+    const client = new MongoClient(uri);
+    await client.connect();
+
+    // قاعدة بيانات ومجموعة الطوابع
+    const db = client.db('stampcoin');
+    const stampsCollection = db.collection('stamps');
+
+    // قراءة بيانات الطوابع من قاعدة البيانات
+    const stamps = await stampsCollection.find({}).toArray();
+
+    // تحديد الطوابع المشهورة بناءً على القيمة والتاريخ
+    const famousStamps = stamps
+      .filter(stamp => stamp.estimatedValue > 1000 || stamp.category === 'historical' || stamp.category === 'rare')
+      .sort((a, b) => b.estimatedValue - a.estimatedValue)
+      .slice(0, 10);
+
+    // إنشاء قسم الطوابع المشهورة
+    const famousStampsSection = {
+      title: 'أشهر الطوابع في العالم',
+      description: 'قائمة بأشهر وأغلى الطوابع في التاريخ، مع معلومات عن تاريخها وقيمتها الحالية.',
+      lastUpdated: new Date().toISOString(),
+      stamps: famousStamps.map(stamp => ({
+        id: stamp._id,
+        name: stamp.name,
+        description: stamp.description,
+        imageUrl: stamp.imageUrl,
+        category: stamp.category,
+        estimatedValue: stamp.estimatedValue,
+        currency: stamp.currency,
+        historicalValue: stamp.historicalValue || stamp.estimatedValue * 0.8,
+        historicalYear: stamp.historicalYear || new Date().getFullYear(),
+        originCountry: stamp.originCountry || 'غير معروف',
+        currentOwner: stamp.owner ? stamp.owner.name : 'مجهول',
+        auctionHistory: stamp.auctionHistory || []
+      }))
+    };
+
+    // حفظ القسم في ملف
+    const sectionPath = path.join(databasePath, 'famous-stamps-section.json');
+    fs.writeFileSync(sectionPath, JSON.stringify(famousStampsSection, null, 2));
+
+    // إنشاء صفحة HTML للعرض
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>أشهر الطوابع في العالم - ستامكوين</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      background-color: #003366;
+      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    }
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+    .stamp-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s ease;
+    }
+    .stamp-card:hover {
+      transform: translateY(-5px);
+    }
+    .stamp-image {
+      height: 250px;
+      object-fit: cover;
+    }
+    .stamp-info {
+      padding: 20px;
+      background-color: white;
+    }
+    .stamp-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #003366;
+      margin-top: 10px;
+    }
+    .stamp-category {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      background-color: #e9ecef;
+      margin-top: 10px;
+    }
+    .historical-value {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    .origin-country {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .origin-country i {
+      margin-left: 5px;
+      color: #003366;
+    }
+    .footer {
+      background-color: #003366;
+      color: white;
+      padding: 30px 0;
+      margin-top: 50px;
+    }
+    .footer a {
+      color: #a3c2e3;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      color: white;
+    }
+    .page-header {
+      background-color: #003366;
+      color: white;
+      padding: 40px 0;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <!-- شريط التنقل -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#"><i class="bi bi-stamp"></i> ستامكوين</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-house-door"></i> الرئيسية</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-collection"></i> الطوابع</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-graph-up"></i> السوق</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-wallet2"></i> المحفظة</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="bi bi-star"></i> الطوابع المشهورة</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> الحساب</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- رأس الصفحة -->
+  <div class="page-header">
+    <div class="container">
+      <h1 class="display-4">أشهر الطوابع في العالم</h1>
+      <p class="lead">اكتشف تاريخ الطوابع البريدية وأشهرها قيمة في العالم</p>
+    </div>
+  </div>
+
+  <!-- المحتوى الرئيسي -->
+  <div class="container">
+    <div class="row">
+      ${famousStamps.stamps.map(stamp => `
+      <div class="col-md-6 col-lg-4">
+        <div class="stamp-card">
+          <img src="${stamp.imageUrl}" alt="${stamp.name}" class="stamp-image">
+          <div class="stamp-info">
+            <h4>${stamp.name}</h4>
+            <p class="text-muted">${stamp.description}</p>
+            <div class="stamp-price">${stamp.estimatedValue} ${stamp.currency}</div>
+            <span class="stamp-category">${stamp.category}</span>
+            <div class="historical-value">
+              <i class="bi bi-clock-history"></i> القيمة التاريخية: ${stamp.historicalValue} ${stamp.currency} (${stamp.historicalYear})
+            </div>
+            <div class="origin-country">
+              <i class="bi bi-flag"></i> ${stamp.originCountry}
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-primary btn-sm me-2"><i class="bi bi-eye"></i> عرض التفاصيل</button>
+              <button class="btn btn-outline-primary btn-sm"><i class="bi bi-share"></i> مشاركة</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- تذييل الصفحة -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>منصة ستامكوين</h5>
+          <p>منصة متخصصة في تداول الطوابع الرقمية والمادية باستخدام تقنية البلوك تشين</p>
+        </div>
+        <div class="col-md-4">
+          <h5>روابط سريعة</h5>
+          <ul class="list-unstyled">
+            <li><a href="#">الرئيسية</a></li>
+            <li><a href="#">الطوابع</a></li>
+            <li><a href="#">السوق</a></li>
+            <li><a href="#">المحفظة</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5>تواصل معنا</h5>
+          <ul class="list-unstyled">
+            <li><i class="bi bi-envelope"></i> info@stampcoin.com</li>
+            <li><i class="bi bi-telephone"></i> +123 456 7890</li>
+            <li><i class="bi bi-geo-alt"></i> دبي، الإمارات العربية المتحدة</li>
+          </ul>
+        </div>
+      </div>
+      <hr class="my-4 bg-white">
+      <div class="text-center">
+        <p>&copy; 2023 منصة ستامكوين. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // إضافة سلوك للأزرار
+      const buttons = document.querySelectorAll('.stamp-card button');
+      buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const action = this.textContent.trim();
+          const stampName = this.closest('.stamp-info').querySelector('h4').textContent;
+
+          if (action.includes('عرض التفاصيل')) {
+            console.log('عرض تفاصيل الطابع:', stampName);
+            // هنا يمكن توجيه المستخدم إلى صفحة التفاصيل
+          } else if (action.includes('مشاركة')) {
+            console.log('مشاركة الطابع:', stampName);
+            // هنا يمكن إضافة منطق المشاركة
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+    `;
+
+    // حفظ صفحة HTML
+    const htmlPath = path.join(databasePath, 'famous-stamps.html');
+    fs.writeFileSync(htmlPath, htmlContent);
+
+    console.log(`تم إنشاء قسم الطوابع المشهورة في ${sectionPath} وصفحة العرض في ${htmlPath}`);
+    return { success: true, sectionPath, htmlPath };
+  } catch (error) {
+    console.error('خطأ في إنشاء قسم الطوابع المشهورة:', error);
+    return { success: false, message: error.message };
+  } finally {
+    // إغلاق اتصال قاعدة البيانات
+    if (client) {
+      await client.close();
+    }
+  }
+}
+
+// استدعاء الدالة مع معلمات من سطر الأوامر
+const databasePath = process.argv[2] || './stamps-database';
+createFamousStampsSection(databasePath)
+  .then(result => {
+    if (!result.success) {
+      process.exit(1);
+    }
+  })
+  .catch(error => {
+    console.error('حدث خطأ:', error);
+    process.exit(1);
+  });
+
+
+===== FILE: scripts/create-investment-plan.js =====
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
+
+async function createInvestmentPlan(options) {
+  try {
+    console.log('جاري إنشاء خطة الاستثمار...');
+
+    // قراءة معلمات الخطة من سطر الأوامر
+    const { miningReward, generationRate, investmentOptions } = options;
+
+    // تحليل خيارات الاستثمار
+    const optionsArray = investmentOptions.split(',');
+
+    // إنشاء بيانات الخطة
+    const investmentPlan = {
+      name: 'خطة استثمار ستامكوين',
+      description: 'خطة استثمار متعددة المراحل للتعدين والتوليد والاستثمار في عملة ستامكوين',
+      createdAt: new Date().toISOString(),
+      parameters: {
+        miningReward: parseFloat(miningReward) || 0.5,
+        generationRate: parseFloat(generationRate) || 0.2,
+        investmentOptions: optionsArray
+      },
+      phases: [
+        {
+          name: 'مرحلة التعدين',
+          duration: '6 أشهر',
+          description: 'التركيز على تعدين عملة ستامكوين وزيادة القاعدة',
+          objectives: [
+            'زيادة عدد المستخدمين النشطين',
+            'تعزيز أمان الشبكة',
+            'زيادة الكتلة'
+          ],
+          metrics: [
+            'عدد المعاملات اليومية',
+            'حجم التعدين',
+            'عدد المستخدمين الجدد'
+          ],
+          rewards: [
+            'مكافأة تعدين أولية: 0.5 STP لكل كتلة',
+            'مكافأة إحالة: 10% من عمليات الإحالة'
+          ]
+        },
+        {
+          name: 'مرحلة التوليد',
+          duration: '12 شهر',
+          description: 'زيادة توليد عملة ستامكوين وتطبيق آليات الاحتراز',
+          objectives: [
+            'تنفيذ آلية الاحتراز',
+            'زيادة السيولة',
+            'تقليل التقلب'
+          ],
+          metrics: [
+            'معدل التوليد',
+            'حجم السيولة',
+            'مستوى التقلب'
+          ],
+          rewards: [
+            'مكافأة توليد: 0.2 STP لكل معاملة',
+            'مكافأة الاحتفاظ: 5% لكل 30 يوم من الاحتفاظ بالعملات'
+          ]
+        },
+        {
+          name: 'مرحلة الاستثمار',
+          duration: '18 شهر',
+          description: 'تطبيق آليات الاستثمار المتقدمة وتنمية البيئة',
+          objectives: [
+            'تنمية نظام القروض',
+            'زيادة الشراكات',
+            'تطبيق آلية التصويت'
+          ],
+          metrics: [
+            'حجم القروض',
+            'عدد الشراكات',
+            'مشاركة التصويت'
+          ],
+          rewards: [
+            'مكافأة القروض: 15% من الأرباح',
+            'مكافأة الشراكات: 20% من إيرادات الشراكة',
+            'مكافأة التصويت: 5 STP لكل تصويت'
+          ]
+        }
+      ],
+      investmentOptions: optionsArray.map(option => ({
+        name: option.trim(),
+        duration: option.includes('short-term') ? '3 أشهر' : 
+                 option.includes('medium-term') ? '6 أشهر' : '12 شهر',
+        minInvestment: option.includes('short-term') ? 100 : 
+                      option.includes('medium-term') ? 500 : 1000,
+        maxInvestment: option.includes('short-term') ? 1000 : 
+                      option.includes('medium-term') ? 5000 : 10000,
+        returnRate: option.includes('short-term') ? 10 : 
+                   option.includes('medium-term') ? 15 : 25,
+        description: option.includes('short-term') ? 'استثمار قصير الأجل بأقل مخاطرة' :
+                    option.includes('medium-term') ? 'استثمار متوسط الأجل بمخاطرة متوسطة' :
+                    'استثمار طويل الأجل بأعلى عائد'
+      }))
+    };
+
+    // حفظ الخطة في ملف
+    const planPath = path.join(__dirname, '../investment-plan.json');
+    fs.writeFileSync(planPath, JSON.stringify(investmentPlan, null, 2));
+
+    console.log(`تم إنشاء خطة الاستثمار بنجاح في ${planPath}`);
+    return { success: true, planPath };
+  } catch (error) {
+    console.error('خطأ في إنشاء خطة الاستثمار:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+// استدعاء الدالة مع معلمات من سطر الأوامر
+const options = {
+  miningReward: process.argv[2] || '0.5',
+  generationRate: process.argv[3] || '0.2',
+  investmentOptions: process.argv[4] || 'short-term,medium-term,long-term'
+};
+
+createInvestmentPlan(options)
+  .then(result => {
+    if (!result.success) {
+      process.exit(1);
+    }
+  })
+  .catch(error => {
+    console.error('حدث خطأ:', error);
+    process.exit(1);
+  });
+
+
+===== FILE: scripts/deploy.js =====
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+console.log('Starting deployment process...');
+
+// Get environment from command line arguments
+const env = process.argv[2] || 'development';
+
+console.log(`Deploying to ${env} environment...`);
+
+// Create necessary directories
+const distDir = path.join(__dirname, '..', 'dist');
+if (!fs.existsSync(distDir)) {
+    fs.mkdirSync(distDir, { recursive: true });
+    console.log('Created dist directory');
+}
+
+// Copy documentation to dist folder
+const docsDir = path.join(__dirname, '..', 'docs');
+if (fs.existsSync(docsDir)) {
+    const targetDir = path.join(distDir, 'docs');
+    if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // Copy all files from docs to dist/docs
+    fs.readdirSync(docsDir).forEach(file => {
+        const srcFile = path.join(docsDir, file);
+        const destFile = path.join(targetDir, file);
+        if (fs.statSync(srcFile).isFile()) {
+            fs.copyFileSync(srcFile, destFile);
+            console.log(`Copied ${file} to dist/docs`);
+        }
+    });
+}
+
+// Create index.html if it doesn't exist
+const indexFile = path.join(distDir, 'index.html');
+if (!fs.existsSync(indexFile)) {
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .languages {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Stampcoin Platform</h1>
+        <p class="subtitle">منصة رقمية | Digital Platform | Digitale Plattform</p>
+
+        <p class="description">
+            An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
+            Secure peer-to-peer transfers and a marketplace for digital collectibles.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>💳 Digital Wallet</h3>
+                <p>Secure storage for your digital stamps and tokens</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Transfers</h3>
+                <p>Blockchain-powered peer-to-peer transactions</p>
+            </div>
+            <div class="feature">
+                <h3>🛍️ Marketplace</h3>
+                <p>Buy, sell, and trade digital collectibles</p>
+            </div>
+            <div class="feature">
+                <h3>👤 User Profiles</h3>
+                <p>Verified accounts with complete profile management</p>
+            </div>
+        </div>
+
+        <a href="https://github.com/zedanazad43/stp" class="cta-button">View on GitHub</a>
+
+        <div class="languages">
+            <p>🇸🇦 العربية • 🇬🇧 English • 🇩🇪 Deutsch</p>
+        </div>
+    </div>
+</body>
+</html>`;
+    fs.writeFileSync(indexFile, html);
+    console.log('Created index.html');
+}
+
+// Build the application
+try {
+    console.log('Building application...');
+    execSync('npm run build', { stdio: 'inherit' });
+    console.log('Application built successfully');
+} catch (error) {
+    console.error('Error building application:', error);
+    process.exit(1);
+}
+
+console.log('Deployment completed successfully!');
+
+
+===== FILE: scripts/merge-repository.js =====
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = process.cwd();
+const EXCLUDED_DIR_NAMES = new Set([
+  ".git",
+  "node_modules",
+  "actions-runner",
+  "git",
+  "dist"
+]);
+
+function isExcluded(relPath) {
+  const normalized = relPath.replace(/\\/g, "/");
+  const parts = normalized.split("/");
+  if (parts.includes("artifacts") && parts.includes("merged")) return true;
+  return parts.some((p) => EXCLUDED_DIR_NAMES.has(p));
+}
+
+function listFilesRecursively(dir, bucket = []) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    const rel = path.relative(ROOT, full).replace(/\\/g, "/");
+    if (isExcluded(rel)) continue;
+
+    if (entry.isDirectory()) {
+      listFilesRecursively(full, bucket);
+      continue;
+    }
+
+    if (!entry.isFile()) continue;
+    bucket.push({ full, rel });
+  }
+  return bucket;
+}
+
+function readUtf8File(filePath) {
+  return fs.readFileSync(filePath, "utf8");
+}
+
+function sha256(content) {
+  return require("crypto").createHash("sha256").update(content).digest("hex");
+}
+
+function ensureDir(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+function detectExtension(rel) {
+  const ext = path.extname(rel).toLowerCase();
+  return ext || "[noext]";
+}
+
+function main() {
+  const now = new Date().toISOString();
+  const outputRoot = path.join(ROOT, "artifacts", "merged");
+  const extensionRoot = path.join(outputRoot, "extensions");
+  ensureDir(extensionRoot);
+
+  const includeExtensions = new Set([
+    ".js",
+    ".json",
+    ".md",
+    ".yml",
+    ".yaml",
+    ".toml",
+    ".sh",
+    ".ps1",
+    ".txt",
+    ".html",
+    ".css",
+    ".py",
+    ".ts",
+    ".tf",
+    ".hcl",
+    ".cjs",
+    ".bat",
+    "[noext]"
+  ]);
+
+  const allFiles = listFilesRecursively(ROOT)
+    .filter((f) => includeExtensions.has(detectExtension(f.rel)))
+    .sort((a, b) => a.rel.localeCompare(b.rel));
+
+  const byExtension = new Map();
+  const records = [];
+
+  for (const file of allFiles) {
+    let content;
+    try {
+      content = readUtf8File(file.full);
+    } catch (_e) {
+      continue;
+    }
+
+    const ext = detectExtension(file.rel);
+    if (!byExtension.has(ext)) byExtension.set(ext, []);
+
+    const stat = fs.statSync(file.full);
+    const record = {
+      path: file.rel,
+      extension: ext,
+      size: stat.size,
+      hash: sha256(content),
+      content
+    };
+
+    byExtension.get(ext).push(record);
+    records.push(record);
+  }
+
+  const mergedFiles = [];
+
+  for (const [ext, items] of Array.from(byExtension.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
+    const extName = ext === "[noext]" ? "noext" : ext.slice(1);
+    const outPath = path.join(extensionRoot, `${extName}.merged.txt`);
+
+    let merged = "";
+    merged += `# Merged extension: ${ext}\n`;
+    merged += `# Generated at: ${now}\n`;
+    merged += `# File count: ${items.length}\n\n`;
+
+    for (const item of items) {
+      merged += `\n\n===== FILE: ${item.path} =====\n`;
+      merged += item.content;
+      if (!item.content.endsWith("\n")) merged += "\n";
+    }
+
+    fs.writeFileSync(outPath, merged, "utf8");
+    mergedFiles.push(path.relative(ROOT, outPath).replace(/\\/g, "/"));
+  }
+
+  const pullRequestCandidates = records.filter((r) => {
+    const p = r.path.toLowerCase();
+    return (
+      p.includes("pull_request") ||
+      /(^|\/)pr\d+/.test(p) ||
+      p.includes("merge_resolution") ||
+      p.includes("resolution_summary")
+    );
+  });
+
+  let prDocument = "# Pull Request and Merge Records\n\n";
+  prDocument += `Generated at: ${now}\n\n`;
+
+  if (pullRequestCandidates.length === 0) {
+    prDocument += "No PR-related files were detected in the selected scope.\n";
+  } else {
+    for (const pr of pullRequestCandidates.sort((a, b) => a.path.localeCompare(b.path))) {
+      prDocument += `\n\n## ${pr.path}\n\n`;
+      prDocument += pr.content;
+      if (!pr.content.endsWith("\n")) prDocument += "\n";
+    }
+  }
+
+  fs.writeFileSync(path.join(outputRoot, "pull-requests.md"), prDocument, "utf8");
+
+  const unifiedRepository = {
+    generatedAt: now,
+    scope: {
+      root: ROOT,
+      includedExtensions: Array.from(includeExtensions),
+      excludedDirectoryNames: Array.from(EXCLUDED_DIR_NAMES),
+      excludedGeneratedPath: "artifacts/merged"
+    },
+    stats: {
+      files: records.length,
+      extensions: Array.from(byExtension.keys()).sort(),
+      mergedFiles: mergedFiles.length,
+      prFiles: pullRequestCandidates.length
+    },
+    pullRequests: pullRequestCandidates.map((r) => ({
+      path: r.path,
+      extension: r.extension,
+      size: r.size,
+      hash: r.hash,
+      content: r.content
+    })),
+    files: records
+  };
+
+  fs.writeFileSync(
+    path.join(outputRoot, "repository-unified.json"),
+    JSON.stringify(unifiedRepository, null, 2),
+    "utf8"
+  );
+
+  const summary = {
+    generatedAt: now,
+    mergedFiles,
+    totalFiles: records.length,
+    byExtension: Array.from(byExtension.entries())
+      .map(([ext, files]) => ({ extension: ext, count: files.length }))
+      .sort((a, b) => b.count - a.count)
+  };
+
+  fs.writeFileSync(path.join(outputRoot, "merge-summary.json"), JSON.stringify(summary, null, 2), "utf8");
+
+  console.log("Merge completed.");
+  console.log(`Files indexed: ${records.length}`);
+  console.log(`Extension bundles: ${mergedFiles.length}`);
+  console.log(`PR files merged: ${pullRequestCandidates.length}`);
+}
+
+main();
+
+
+===== FILE: scripts/setup-ui.js =====
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+
+function buildDashboardHtml() {
+  return `<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة ستامكوين</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; background: #f4f7fb; margin: 0; }
+    header { background: #0a3b6e; color: #fff; padding: 16px 20px; }
+    main { max-width: 1000px; margin: 20px auto; padding: 0 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    h2 { margin-top: 0; font-size: 18px; }
+    .muted { color: #666; font-size: 13px; }
+    .pair { display: flex; justify-content: space-between; margin: 8px 0; }
+    .up { color: #0f8a2c; }
+    .down { color: #b3261e; }
+    button { background: #0a3b6e; color: #fff; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>منصة ستامكوين</h1>
+    <div class="muted">لوحة تشغيل تجريبية</div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>الرصيد</h2>
+        <div id="balance">جاري التحميل...</div>
+      </section>
+
+      <section class="card">
+        <h2>أزواج التداول</h2>
+        <div id="pairs">جاري التحميل...</div>
+      </section>
+
+      <section class="card">
+        <h2>طرق التحويل</h2>
+        <ul id="methods"></ul>
+      </section>
+
+      <section class="card">
+        <h2>الإشعارات</h2>
+        <ul id="notifications"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    async function loadJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+
+    async function loadBalance() {
+      const balance = await loadJson('/api/balance');
+      const el = document.getElementById('balance');
+      el.innerHTML = '<div>STP: ' + balance.stp + '</div>' +
+                     '<div>EUR: ' + balance.eur + '</div>' +
+                     '<div>USD: ' + balance.usd + '</div>';
+    }
+
+    async function loadPairs() {
+      const pairs = await loadJson('/api/trading-pairs');
+      const el = document.getElementById('pairs');
+      el.innerHTML = '';
+      pairs.forEach(function (pair) {
+        const cls = pair.change >= 0 ? 'up' : 'down';
+        const row = document.createElement('div');
+        row.className = 'pair';
+        row.innerHTML = '<span>' + pair.symbol + '</span>' +
+                        '<span>' + pair.price + ' <strong class="' + cls + '">' + pair.change + '</strong></span>';
+        el.appendChild(row);
+      });
+    }
+
+    async function loadMethods() {
+      const methods = await loadJson('/api/transfer-methods');
+      const el = document.getElementById('methods');
+      el.innerHTML = '';
+      methods.forEach(function (m) {
+        const li = document.createElement('li');
+        li.innerHTML = m.name + ' <button onclick="alert(\'اختيار: ' + m.id + '\')">اختيار</button>';
+        el.appendChild(li);
+      });
+    }
+
+    async function markAsRead(id) {
+      const res = await fetch('/api/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id })
+      });
+      if (res.ok) loadNotifications();
+    }
+
+    async function loadNotifications() {
+      const notifications = await loadJson('/api/notifications');
+      const el = document.getElementById('notifications');
+      el.innerHTML = '';
+      notifications.forEach(function (n) {
+        const li = document.createElement('li');
+        const btn = n.read ? '' : ' <button onclick="markAsRead(' + n.id + ')">قراءة</button>';
+        li.innerHTML = '<strong>' + n.title + '</strong><div class="muted">' + n.message + ' - ' + n.date + '</div>' + btn;
+        el.appendChild(li);
+      });
+    }
+
+    async function init() {
+      try {
+        await Promise.all([loadBalance(), loadPairs(), loadMethods(), loadNotifications()]);
+      } catch (e) {
+        console.error('Dashboard initialization failed:', e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>`;
+}
+
+async function setupUI(options = {}) {
+  const app = express();
+  const port = Number(process.env.PORT || options.port || 3000);
+
+  app.use(express.json());
+
+  app.get("/api/balance", async (_req, res) => {
+    res.json({ stp: 1000, eur: 500, usd: 550 });
+  });
+
+  app.get("/api/transfer-methods", async (_req, res) => {
+    res.json([
+      { id: "bank", name: "تحويل بنكي" },
+      { id: "crypto", name: "تحويل رقمي" },
+      { id: "stp", name: "تحويل بعملة STP" }
+    ]);
+  });
+
+  app.get("/api/trading-pairs", async (_req, res) => {
+    res.json([
+      { symbol: "STP/EUR", price: 0.15, change: 0.02 },
+      { symbol: "STP/USD", price: 0.16, change: 0.03 },
+      { symbol: "STP/BTC", price: 0.0000035, change: -0.0005 }
+    ]);
+  });
+
+  app.get("/api/notifications", async (_req, res) => {
+    res.json([
+      { id: 1, title: "تم تأكيد عملية الشراء", message: "تم شراء طابع بنجاح", date: "2026-02-23", read: false },
+      { id: 2, title: "عرض جديد", message: "تمت إضافة طابع نادر جديد", date: "2026-02-22", read: false },
+      { id: 3, title: "تحديث السعر", message: "قيمة طابعك ارتفعت", date: "2026-02-21", read: true }
+    ]);
+  });
+
+  app.post("/api/notifications/read", async (_req, res) => {
+    res.json({ success: true });
+  });
+
+  const publicDir = path.join(__dirname, "..", "public");
+  fs.mkdirSync(publicDir, { recursive: true });
+  fs.writeFileSync(path.join(publicDir, "index.html"), buildDashboardHtml(), "utf8");
+
+  app.use(express.static(publicDir));
+
+  return new Promise((resolve) => {
+    app.listen(port, () => {
+      console.log(`UI server listening on http://localhost:${port}`);
+      resolve({ success: true, message: "UI setup complete", port });
+    });
+  });
+}
+
+if (require.main === module) {
+  setupUI().catch((error) => {
+    console.error("Failed to setup UI:", error);
+    process.exit(1);
+  });
+}
+
+module.exports = { setupUI };
+
+
+===== FILE: server.js =====
+const express = require("express");
+const fs = require("fs").promises;
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const DATA_FILE = path.join(__dirname, "data.json");
+const SYNC_TOKEN = process.env.SYNC_TOKEN || "";
+
+async function readData() {
+  try {
+    const raw = await fs.readFile(DATA_FILE, "utf8");
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error("Error reading data file:", e.message);
+    return [];
+  }
+}
+async function writeData(todos) {
+  try {
+    await fs.writeFile(DATA_FILE, JSON.stringify(todos, null, 2), "utf8");
+    return true;
+  } catch (e) {
+    console.error("Write error:", e);
+    return false;
+  }
+}
+
+function requireToken(req, res, next) {
+  const auth = req.get("Authorization") || "";
+  const token = auth.replace(/^Bearer\s+/i, "");
+  // Allow unauthenticated access in development when SYNC_TOKEN is not set
+  // In production, always set SYNC_TOKEN environment variable
+  if (!SYNC_TOKEN) {
+    console.warn("SYNC_TOKEN not configured - authentication disabled (development mode)");
+    return next();
+  }
+  if (token !== SYNC_TOKEN) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+}
+
+app.get("/sync", requireToken, async (req, res) => {
+  const todos = await readData();
+  res.json({ todos });
+});
+
+app.post("/sync", requireToken, async (req, res) => {
+  const payload = req.body;
+  if (!payload || !Array.isArray(payload.todos)) {
+    return res.status(400).json({ error: "Invalid payload, expected { todos: [...] }" });
+  }
+  const ok = await writeData(payload.todos);
+  if (!ok) return res.status(500).json({ error: "Failed to store data" });
+  res.json({ ok: true });
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Stampcoin Platform server listening on port ${port}`);
+});
+
+
+===== FILE: src/ai-agent-expert/index.js =====
+const express = require("express");
+const fs = require("fs").promises;
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Agent configuration
+const AGENT_CONFIG = {
+    name: "STP Agent Expert",
+    version: "1.0.0",
+    capabilities: [
+        "code-analysis",
+        "bug-fixing",
+        "project-organization",
+        "performance-optimization",
+        "security-audit",
+        "documentation-generation",
+        "test-creation"
+    ],
+    priorityAreas: ["code-quality", "performance", "security"]
+};
+
+// Agent state
+const agentState = {
+    active: false,
+    currentTask: null,
+    completedTasks: [],
+    pendingIssues: []
+};
+
+// Helper functions
+async function readProjectData() {
+    try {
+        const raw = await fs.readFile(path.join(__dirname, "../../data.json"), "utf8");
+        return JSON.parse(raw);
+    } catch (e) {
+        console.error("Error reading project data:", e.message);
+        return [];
+    }
+}
+
+async function writeProjectData(data) {
+    try {
+        await fs.writeFile(path.join(__dirname, "../../data.json"), JSON.stringify(data, null, 2), "utf8");
+        return true;
+    } catch (e) {
+        console.error("Write error:", e);
+        return false;
+    }
+}
+
+// Agent API endpoints
+app.get("/agent/status", (req, res) => {
+    res.json({
+        status: agentState.active ? "active" : "inactive",
+        currentTask: agentState.currentTask,
+        completedTasks: agentState.completedTasks.length,
+        pendingIssues: agentState.pendingIssues.length
+    });
+});
+
+app.post("/agent/activate", (req, res) => {
+    agentState.active = true;
+    res.json({ message: "Agent activated successfully", status: agentState.active });
+});
+
+app.post("/agent/deactivate", (req, res) => {
+    agentState.active = false;
+    res.json({ message: "Agent deactivated successfully", status: agentState.active });
+});
+
+app.post("/agent/analyze-code", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { filePath, analysisType } = req.body;
+
+        // In a real implementation, this would perform actual code analysis
+        // For now, we'll simulate the analysis
+        const analysis = {
+            filePath,
+            analysisType: analysisType || "general",
+            timestamp: new Date().toISOString(),
+            issues: [
+                {
+                    type: "performance",
+                    severity: "medium",
+                    description: "Potential memory leak in loop",
+                    suggestion: "Consider using object pooling for frequently created objects"
+                },
+                {
+                    type: "security",
+                    severity: "high",
+                    description: "Input validation missing in user data processing",
+                    suggestion: "Add comprehensive input validation to prevent injection attacks"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "code-analysis",
+            status: "completed",
+            result: analysis
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            analysis
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/fix-issues", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { issues } = req.body;
+
+        // In a real implementation, this would apply fixes to the code
+        // For now, we'll simulate the fixes
+        const fixes = issues.map(issue => ({
+            ...issue,
+            fixApplied: true,
+            fixDescription: `Applied fix for ${issue.type} issue: ${issue.suggestion}`,
+            timestamp: new Date().toISOString()
+        }));
+
+        agentState.currentTask = {
+            type: "bug-fixing",
+            status: "completed",
+            result: fixes
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            fixes
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/organize-project", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { organizationType } = req.body;
+
+        // In a real implementation, this would reorganize the project structure
+        // For now, we'll simulate the organization
+        const organization = {
+            type: organizationType || "general",
+            timestamp: new Date().toISOString(),
+            changes: [
+                {
+                    action: "restructure",
+                    description: "Reorganized components by feature rather than by type"
+                },
+                {
+                    action: "rename",
+                    description: "Renamed files to follow consistent naming conventions"
+                },
+                {
+                    action: "relocate",
+                    description: "Moved utility functions to a dedicated utils directory"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "project-organization",
+            status: "completed",
+            result: organization
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            organization
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/optimize-performance", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { targetArea } = req.body;
+
+        // In a real implementation, this would analyze and optimize performance
+        // For now, we'll simulate the optimization
+        const optimization = {
+            targetArea: targetArea || "general",
+            timestamp: new Date().toISOString(),
+            improvements: [
+                {
+                    area: "database",
+                    improvement: "Added query indexing",
+                    expectedImpact: "30% faster database queries"
+                },
+                {
+                    area: "frontend",
+                    improvement: "Implemented lazy loading",
+                    expectedImpact: "40% reduction in initial load time"
+                },
+                {
+                    area: "api",
+                    improvement: "Added response caching",
+                    expectedImpact: "50% reduction in API response time"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "performance-optimization",
+            status: "completed",
+            result: optimization
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            optimization
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/audit-security", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { scanDepth } = req.body;
+
+        // In a real implementation, this would perform security audits
+        // For now, we'll simulate the audit
+        const audit = {
+            scanDepth: scanDepth || "standard",
+            timestamp: new Date().toISOString(),
+            findings: [
+                {
+                    type: "vulnerability",
+                    severity: "high",
+                    description: "Cross-site scripting (XSS) vulnerability in user profile",
+                    recommendation: "Implement proper output encoding and content security policy"
+                },
+                {
+                    type: "vulnerability",
+                    severity: "medium",
+                    description: "Insufficient rate limiting on API endpoints",
+                    recommendation: "Implement rate limiting to prevent brute force attacks"
+                },
+                {
+                    type: "best-practice",
+                    severity: "low",
+                    description: "Missing dependency version pinning",
+                    recommendation: "Pin dependency versions to prevent unexpected updates"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "security-audit",
+            status: "completed",
+            result: audit
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            audit
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/generate-docs", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { docType, targetFiles } = req.body;
+
+        // In a real implementation, this would generate documentation
+        // For now, we'll simulate the documentation generation
+        const documentation = {
+            docType: docType || "api",
+            targetFiles: targetFiles || ["all"],
+            timestamp: new Date().toISOString(),
+            generated: [
+                {
+                    type: "api-docs",
+                    files: ["api/routes/auth.js", "api/routes/user.js"],
+                    description: "Generated comprehensive API documentation"
+                },
+                {
+                    type: "readme",
+                    files: ["README.md"],
+                    description: "Updated project README with setup instructions"
+                },
+                {
+                    type: "code-comments",
+                    files: ["src/utils/helpers.js"],
+                    description: "Added inline documentation for utility functions"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "documentation-generation",
+            status: "completed",
+            result: documentation
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            documentation
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/agent/create-tests", async (req, res) => {
+    if (!agentState.active) {
+        return res.status(403).json({ error: "Agent is not active" });
+    }
+
+    try {
+        const { testType, targetFiles } = req.body;
+
+        // In a real implementation, this would create tests
+        // For now, we'll simulate test creation
+        const tests = {
+            testType: testType || "unit",
+            targetFiles: targetFiles || ["all"],
+            timestamp: new Date().toISOString(),
+            created: [
+                {
+                    type: "unit-tests",
+                    files: ["src/services/auth.service.js"],
+                    description: "Created unit tests for authentication service"
+                },
+                {
+                    type: "integration-tests",
+                    files: ["tests/integration/user.test.js"],
+                    description: "Created integration tests for user API endpoints"
+                },
+                {
+                    type: "e2e-tests",
+                    files: ["tests/e2e/login.spec.js"],
+                    description: "Created end-to-end tests for login functionality"
+                }
+            ]
+        };
+
+        agentState.currentTask = {
+            type: "test-creation",
+            status: "completed",
+            result: tests
+        };
+
+        agentState.completedTasks.push(agentState.currentTask);
+
+        res.json({
+            success: true,
+            tests
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/agent/history", (req, res) => {
+    res.json({
+        completedTasks: agentState.completedTasks,
+        pendingIssues: agentState.pendingIssues
+    });
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`AI Agent Expert server listening on port ${PORT}`);
+});
+
+
+===== FILE: src/ai-agent-expert/utils.js =====
+const fs = require("fs").promises;
+const path = require("path");
+
+/**
+ * AI Agent Expert Utilities
+ * Helper functions for the AI agent system
+ */
+
+// File system utilities
+const fileUtils = {
+    /**
+     * Read a JSON file and parse its content
+     * @param {string} filePath - Path to the JSON file
+     * @returns {Promise<Object>} Parsed JSON content
+     */
+    async readJsonFile(filePath) {
+        try {
+            const raw = await fs.readFile(filePath, "utf8");
+            return JSON.parse(raw);
+        } catch (error) {
+            console.error(`Error reading JSON file ${filePath}:`, error.message);
+            return null;
+        }
+    },
+
+    /**
+     * Write an object to a JSON file
+     * @param {string} filePath - Path to the JSON file
+     * @param {Object} data - Data to write
+     * @returns {Promise<boolean>} Success status
+     */
+    async writeJsonFile(filePath, data) {
+        try {
+            await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+            return true;
+        } catch (error) {
+            console.error(`Error writing JSON file ${filePath}:`, error.message);
+            return false;
+        }
+    },
+
+    /**
+     * List all files in a directory recursively
+     * @param {string} dirPath - Directory path
+     * @param {Array} fileExtensions - Optional file extensions to filter
+     * @returns {Promise<Array>} List of file paths
+     */
+    async listFilesRecursive(dirPath, fileExtensions = []) {
+        const files = [];
+
+        try {
+            const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+                const fullPath = path.join(dirPath, entry.name);
+
+                if (entry.isDirectory()) {
+                    const subFiles = await this.listFilesRecursive(fullPath, fileExtensions);
+                    files.push(...subFiles);
+                } else if (entry.isFile()) {
+                    if (fileExtensions.length === 0 || fileExtensions.includes(path.extname(entry.name))) {
+                        files.push(fullPath);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error reading directory ${dirPath}:`, error.message);
+        }
+
+        return files;
+    }
+};
+
+// Code analysis utilities
+const codeAnalysisUtils = {
+    /**
+     * Analyze code quality metrics
+     * @param {string} code - Code to analyze
+     * @returns {Object} Analysis results
+     */
+    analyzeCodeQuality(code) {
+        // This is a simplified version - in a real implementation,
+        // you would use proper code analysis tools
+        const lines = code.split("\n");
+        const metrics = {
+            totalLines: lines.length,
+            commentLines: lines.filter(line => line.trim().startsWith("//")).length,
+            blankLines: lines.filter(line => line.trim() === "").length,
+            complexityScore: this.calculateComplexity(code),
+            maintainabilityIndex: this.calculateMaintainability(code)
+        };
+
+        return metrics;
+    },
+
+    /**
+     * Calculate cyclomatic complexity (simplified)
+     * @param {string} code - Code to analyze
+     * @returns {number} Complexity score
+     */
+    calculateComplexity(code) {
+        const complexityKeywords = ["if", "else", "for", "while", "switch", "case", "try", "catch", "finally"];
+        const lines = code.split("\n");
+        let complexity = 1; // Base complexity
+
+        for (const line of lines) {
+            for (const keyword of complexityKeywords) {
+                if (line.includes(keyword)) {
+                    complexity++;
+                }
+            }
+        }
+
+        return complexity;
+    },
+
+    /**
+     * Calculate maintainability index (simplified)
+     * @param {string} code - Code to analyze
+     * @returns {number} Maintainability score (0-100)
+     */
+    calculateMaintainability(code) {
+        // This is a simplified calculation
+        // In a real implementation, you would use established metrics like those from SonarQube
+        const lines = code.split("\n");
+        const totalLines = lines.length;
+        const commentLines = lines.filter(line => line.trim().startsWith("//")).length;
+        const blankLines = lines.filter(line => line.trim() === "").length;
+
+        // Simple formula based on lines of code and comments
+        const commentRatio = commentLines / totalLines;
+        const blankRatio = blankLines / totalLines;
+
+        // Higher is better
+        return Math.min(100, Math.round(50 + (commentRatio * 30) + (blankRatio * 20)));
+    }
+};
+
+// Security utilities
+const securityUtils = {
+    /**
+     * Check for common security vulnerabilities in code
+     * @param {string} code - Code to analyze
+     * @returns {Array} List of security issues
+     */
+    checkSecurityVulnerabilities(code) {
+        const vulnerabilities = [];
+
+        // Check for hardcoded secrets
+        const secretPattern = /password\s*=\s*["'][^"']+["']/gi;
+        if (secretPattern.test(code)) {
+            vulnerabilities.push({
+                type: "security",
+                severity: "high",
+                message: "Potential hardcoded password detected",
+                suggestion: "Use environment variables for sensitive data"
+            });
+        }
+
+        // Check for SQL injection vulnerabilities
+        const sqlPattern = /(SELECT|INSERT|UPDATE|DELETE).*\+.*\$/gi;
+        if (sqlPattern.test(code)) {
+            vulnerabilities.push({
+                type: "security",
+                severity: "high",
+                message: "Potential SQL injection vulnerability",
+                suggestion: "Use parameterized queries"
+            });
+        }
+
+        // Check for XSS vulnerabilities
+        const xssPattern = /innerHTML\s*=\s*.*\+/gi;
+        if (xssPattern.test(code)) {
+            vulnerabilities.push({
+                type: "security",
+                severity: "high",
+                message: "Potential XSS vulnerability",
+                suggestion: "Use textContent or proper escaping"
+            });
+        }
+
+        return vulnerabilities;
+    }
+};
+
+// Performance utilities
+const performanceUtils = {
+    /**
+     * Check for performance issues in code
+     * @param {string} code - Code to analyze
+     * @returns {Array} List of performance issues
+     */
+    checkPerformanceIssues(code) {
+        const issues = [];
+
+        // Check for memory leaks (simplified)
+        const memoryLeakPattern = /(setInterval|setTimeout)\(.*\)/g;
+        const matches = code.match(memoryLeakPattern);
+        if (matches) {
+            issues.push({
+                type: "performance",
+                severity: "medium",
+                message: "Potential memory leak: setInterval/setTimeout without cleanup",
+                suggestion: "Clear intervals/timeouts when they're no longer needed"
+            });
+        }
+
+        // Check for inefficient DOM manipulation
+        const domPattern = /document\.getElementById.*\.innerHTML\s*=/g;
+        if (domPattern.test(code)) {
+            issues.push({
+                type: "performance",
+                severity: "medium",
+                message: "Inefficient DOM manipulation detected",
+                suggestion: "Use document fragments or batch DOM updates"
+            });
+        }
+
+        // Check for blocking operations
+        const blockingPattern = /while\(true\)|for\(.*;.*;.*\)\s*{/g;
+        if (blockingPattern.test(code)) {
+            issues.push({
+                type: "performance",
+                severity: "high",
+                message: "Potential blocking operation detected",
+                suggestion: "Use asynchronous operations for long-running tasks"
+            });
+        }
+
+        return issues;
+    }
+};
+
+// Export all utilities
+module.exports = {
+    fileUtils,
+    codeAnalysisUtils,
+    securityUtils,
+    performanceUtils
+};
+
+
+===== FILE: stampcoin-platform/lib_prisma_Version2.js =====
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+module.exports = prisma;
+
+
+===== FILE: stampcoin-platform/lib/lib_prisma_Version2.js =====
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+module.exports = prisma;
+
+
+===== FILE: stampcoin-platform/todo-app___tests___app.test_Version2.js =====
+const fs = require("fs");
+test("package.json exists in todo-app", () => {
+  const exists = fs.existsSync("todo-app/package.json");
+  expect(exists).toBe(true);
+});
+
+
+===== FILE: stampcoin-platform/todo-sync-backend_server_Version2.js =====
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const DATA_FILE = path.join(__dirname, "data.json");
+const SYNC_TOKEN = process.env.SYNC_TOKEN || "";
+
+function readData() {
+  try {
+    const raw = fs.readFileSync(DATA_FILE, "utf8");
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+function writeData(todos) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(todos, null, 2), "utf8");
+    return true;
+  } catch (e) {
+    console.error("Write error:", e);
+    return false;
+  }
+}
+
+function requireToken(req, res, next) {
+  const auth = req.get("Authorization") || "";
+  const token = auth.replace(/^Bearer\s+/i, "");
+  if (!SYNC_TOKEN || token !== SYNC_TOKEN) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+}
+
+app.get("/sync", requireToken, (req, res) => {
+  const todos = readData();
+  res.json({ todos });
+});
+
+app.post("/sync", requireToken, (req, res) => {
+  const payload = req.body;
+  if (!payload || !Array.isArray(payload.todos)) {
+    return res.status(400).json({ error: "Invalid payload, expected { todos: [...] }" });
+  }
+  const ok = writeData(payload.todos);
+  if (!ok) return res.status(500).json({ error: "Failed to store data" });
+  res.json({ ok: true });
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`todo-sync-backend listening on port ${port}`);
+});
+
+
+===== FILE: wallet.js =====
+// Digital Wallet Module for Stampcoin Platform
+// Module for managing digital wallets, balances, and transactions
+
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const WALLETS_FILE = path.join(__dirname, 'wallets.json');
+const TRANSACTIONS_FILE = path.join(__dirname, 'transactions.json');
+
+/**
+ * Initialize wallet storage files if they don't exist
+ */
+function initializeStorage() {
+  if (!fs.existsSync(WALLETS_FILE)) {
+    fs.writeFileSync(WALLETS_FILE, JSON.stringify({}, null, 2), 'utf8');
+  }
+  if (!fs.existsSync(TRANSACTIONS_FILE)) {
+    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify([], null, 2), 'utf8');
+  }
+}
+
+/**
+ * Read wallets from storage
+ */
+function readWallets() {
+  try {
+    const data = fs.readFileSync(WALLETS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    // Only return empty object if file doesn't exist
+    if (error.code === 'ENOENT') {
+      return {};
+    }
+    // Re-throw other errors (invalid JSON, permissions, etc.)
+    console.error('Error reading wallets:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Write wallets to storage
+ */
+function writeWallets(wallets) {
+  try {
+    fs.writeFileSync(WALLETS_FILE, JSON.stringify(wallets, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing wallets:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Read transactions from storage
+ */
+function readTransactions() {
+  try {
+    const data = fs.readFileSync(TRANSACTIONS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    // Only return empty array if file doesn't exist
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    // Re-throw other errors (invalid JSON, permissions, etc.)
+    console.error('Error reading transactions:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Write transactions to storage
+ */
+function writeTransactions(transactions) {
+  try {
+    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(transactions, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing transactions:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Create a new wallet for a user
+ * @param {string} userId - Unique user identifier
+ * @param {string} userName - User's display name
+ * @returns {object} The created wallet object
+ */
+function createWallet(userId, userName) {
+  const wallets = readWallets();
+  
+  if (wallets[userId]) {
+    throw new Error('Wallet already exists for this user');
+  }
+
+  const wallet = {
+    userId,
+    userName,
+    balance: 0,
+    stamps: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Get wallet by user ID
+ * @param {string} userId - User identifier
+ * @returns {object|null} Wallet object or null if not found
+ */
+function getWallet(userId) {
+  const wallets = readWallets();
+  return wallets[userId] || null;
+}
+
+/**
+ * Get all wallets
+ * @returns {object} All wallets
+ */
+function getAllWallets() {
+  return readWallets();
+}
+
+/**
+ * Update wallet balance
+ * @param {string} userId - User identifier
+ * @param {number} amount - Amount to add (positive) or subtract (negative)
+ * @returns {object} Updated wallet
+ */
+function updateBalance(userId, amount) {
+  // Prevent prototype-polluting or otherwise invalid user identifiers
+  if (
+    typeof userId !== 'string' ||
+    userId === '__proto__' ||
+    userId === 'constructor' ||
+    userId === 'prototype'
+  ) {
+    throw new Error('Invalid userId');
+  }
+
+  const wallets = readWallets();
+  const wallet = wallets[userId];
+  
+  if (!wallet) {
+    throw new Error('Wallet not found');
+  }
+
+  const newBalance = wallet.balance + amount;
+  if (newBalance < 0) {
+    throw new Error('Insufficient balance');
+  }
+
+  wallet.balance = newBalance;
+  wallet.updatedAt = new Date().toISOString();
+  
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Add a stamp to wallet
+ * @param {string} userId - User identifier
+ * @param {object} stamp - Stamp object to add
+ * @returns {object} Updated wallet
+ */
+function addStamp(userId, stamp) {
+  const wallets = readWallets();
+  const wallet = wallets[userId];
+  
+  if (!wallet) {
+    throw new Error('Wallet not found');
+  }
+
+  const stampWithId = {
+    id: crypto.randomUUID(),
+    ...stamp,
+    addedAt: new Date().toISOString()
+  };
+
+  wallet.stamps.push(stampWithId);
+  wallet.updatedAt = new Date().toISOString();
+  
+  wallets[userId] = wallet;
+  writeWallets(wallets);
+  
+  return wallet;
+}
+
+/**
+ * Transfer stamps or balance between wallets
+ * @param {string} fromUserId - Sender's user ID
+ * @param {string} toUserId - Receiver's user ID
+ * @param {number} amount - Amount to transfer (must be positive if transferring balance)
+ * @param {string} stampId - Stamp ID to transfer (optional)
+ * @returns {object} Transaction record
+ */
+function transfer(fromUserId, toUserId, amount = 0, stampId = null) {
+  // Validate that either amount or stampId is provided
+  if (!stampId && (!amount || amount <= 0)) {
+    throw new Error('Transfer amount must be a positive number when transferring balance');
+  }
+  
+  const wallets = readWallets();
+  const fromWallet = wallets[fromUserId];
+  const toWallet = wallets[toUserId];
+  
+  if (!fromWallet || !toWallet) {
+    throw new Error('One or both wallets not found');
+  }
+
+  const transactionId = crypto.randomUUID();
+  const timestamp = new Date().toISOString();
+
+  // Transfer balance
+  if (amount > 0) {
+    if (fromWallet.balance < amount) {
+      throw new Error('Insufficient balance');
+    }
+    fromWallet.balance -= amount;
+    toWallet.balance += amount;
+  }
+
+  // Transfer stamp
+  if (stampId) {
+    const stampIndex = fromWallet.stamps.findIndex(s => s.id === stampId);
+    if (stampIndex === -1) {
+      throw new Error('Stamp not found in sender wallet');
+    }
+    const stamp = fromWallet.stamps.splice(stampIndex, 1)[0];
+    toWallet.stamps.push({
+      ...stamp,
+      transferredAt: timestamp
+    });
+  }
+
+  // Update timestamps
+  fromWallet.updatedAt = timestamp;
+  toWallet.updatedAt = timestamp;
+  
+  wallets[fromUserId] = fromWallet;
+  wallets[toUserId] = toWallet;
+  writeWallets(wallets);
+
+  // Record transaction
+  const transaction = {
+    id: transactionId,
+    from: fromUserId,
+    to: toUserId,
+    amount,
+    stampId,
+    timestamp,
+    status: 'completed'
+  };
+
+  const transactions = readTransactions();
+  transactions.push(transaction);
+  writeTransactions(transactions);
+
+  return transaction;
+}
+
+/**
+ * Get transaction history for a user
+ * @param {string} userId - User identifier
+ * @returns {array} Array of transactions
+ */
+function getTransactionHistory(userId) {
+  const transactions = readTransactions();
+  return transactions.filter(t => t.from === userId || t.to === userId);
+}
+
+/**
+ * Get all transactions
+ * @returns {array} Array of all transactions
+ */
+function getAllTransactions() {
+  return readTransactions();
+}
+
+// Initialize storage on module load
+initializeStorage();
+
+module.exports = {
+  createWallet,
+  getWallet,
+  getAllWallets,
+  updateBalance,
+  addStamp,
+  transfer,
+  getTransactionHistory,
+  getAllTransactions
+};

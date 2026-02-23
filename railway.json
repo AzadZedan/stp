@@ -1,29 +1,21 @@
-# Railway Deployment Configuration
-# 
-# This app is ready to deploy on Railway with the following environment variables:
-#
-# Required:
-#   - SYNC_TOKEN: Secret token for API authentication
-#
-# Optional:
-#   - PORT: Server port (default: 8080)
-#   - NODE_ENV: Environment (default: production)
-#
-# Deployment Instructions:
-#
-# 1. Via Web Dashboard:
-#    - Visit: https://railway.app
-#    - Connect your GitHub repository (zedanazad43/stp)
-#    - Railway auto-detects Node.js and deploys
-#
-# 2. Via Railway CLI:
-#    - npm install -g @railway/cli
-#    - railway login
-#    - railway up
-#
-# After deployment:
-#    - API will be available at: https://<your-railway-domain>.railway.app
-#    - Website: https://zedanazad43.github.io/stp/
-
-name = "stampcoin-platform"
-description = "Stampcoin Digital Platform - Blockchain-based digital stamps"
+{
+  "name": "stampcoin-platform",
+  "description": "Stampcoin Digital Platform - Blockchain-based digital stamps",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 10
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "PORT": "8080",
+    "SYNC_TOKEN": "SET_IN_RAILWAY"
+  },
+  "notes": [
+    "Set SYNC_TOKEN in Railway variables before deployment.",
+    "Repository URL: https://github.com/zedanazad43/stp"
+  ]
+}

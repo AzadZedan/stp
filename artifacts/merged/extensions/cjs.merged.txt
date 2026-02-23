@@ -1,0 +1,11 @@
+# Merged extension: .cjs
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 1
+
+
+
+===== FILE: stampcoin-platform/jest.config_Version2.cjs =====
+module.exports = {
+  testEnvironment: "node",
+  testMatch: ["**/__tests__/**/*.js?(x)", "**/?(*.)+(spec|test).js?(x)"]
+};

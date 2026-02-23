@@ -1,20 +1,2 @@
-# Merged YAML Files
-
-# yml\deploy.yml
-...existing content...
-
-# yml\codeql.yml
-...existing content...
-
-# yml\build-and-push.yml
-...existing content...
-
-# stampcoin-platform\build-and-push.yml
-...existing content...
-
-# stampcoin-platform\github_workflows_test-todo-app_Version2.yml
-...existing content...
-
-# (Other .yml files omitted for brevity)
-
-# End of merged YAML files.
+merged_bundle: artifacts/merged/extensions/yml.merged.txt
+command: npm run merge:repo

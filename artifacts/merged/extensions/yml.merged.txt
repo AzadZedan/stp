@@ -1,0 +1,2186 @@
+# Merged extension: .yml
+# Generated at: 2026-02-23T16:39:18.678Z
+# File count: 32
+
+
+
+===== FILE: .github/deploy-all-workers.yml =====
+name: Deploy All Workers
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy-workers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # ← أضف هذا السطر فقط
+
+      - name: Deploy all Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        env:
+          WORKERS_TO_DEPLOY: "patient-shape-b537,stp,winter-frog-5d6c"
+
+
+===== FILE: .github/workflows/build-and-test.yml =====
+name: Build, Test, and Publish
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+
+
+===== FILE: .github/workflows/build-test-publish.yml =====
+name: Build, Test, and Publish
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Build Docker image
+        run: npm run docker:build
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-to-render:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to Render
+        uses: renderinc/render-deploy-action@v1.1.0
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+
+
+===== FILE: .github/workflows/ci.yml =====
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run security scan
+        run: npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Lint code
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build application
+        run: npm run build
+        continue-on-error: true
+
+
+===== FILE: .github/workflows/deploy-pages.yml =====
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: |
+          mkdir -p _site
+          # Copy docs files if directory exists
+          if [ -d "docs" ]; then
+            cp docs/* _site/ 2>/dev/null || echo "No files found in docs directory"
+          fi
+          # Create index.html if it doesn't exist
+          if [ ! -f _site/index.html ]; then
+            echo "Creating index.html..."
+            cat > _site/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .languages {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Stampcoin Platform</h1>
+        <p class="subtitle">منصة رقمية | Digital Platform | Digitale Plattform</p>
+
+        <p class="description">
+            An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
+            Secure peer-to-peer transfers and a marketplace for digital collectibles.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>💳 Digital Wallet</h3>
+                <p>Secure storage for your digital stamps and tokens</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Transfers</h3>
+                <p>Blockchain-powered peer-to-peer transactions</p>
+            </div>
+            <div class="feature">
+                <h3>🛍️ Marketplace</h3>
+                <p>Buy, sell, and trade digital collectibles</p>
+            </div>
+            <div class="feature">
+                <h3>👤 User Profiles</h3>
+                <p>Verified accounts with complete profile management</p>
+            </div>
+        </div>
+
+        <a href="https://github.com/zedanazad43/stp" class="cta-button">View on GitHub</a>
+
+        <div class="languages">
+            <p>🇸🇦 العربية • 🇬🇧 English • 🇩🇪 Deutsch</p>
+        </div>
+    </div>
+</body>
+</html>
+EOF
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+===== FILE: .github/workflows/deploy.yml =====
+name: نشر شامل Multi-language Deployment
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # استنساخ مستودع المشروع - Checkout the repository
+      - name: استنساخ المستودع
+        uses: actions/checkout@v3
+
+      ### Node.js ###
+      # إعداد Node.js
+      - name: إعداد Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      # تثبيت اعتمادات Node.js
+      - name: تثبيت الاعتماديات (Node.js)
+        if: ${{ env.USE_NODE || exists('package.json') }}
+        run: npm install
+      # بناء مشروع Node.js
+      - name: بناء تطبيق Node.js
+        if: ${{ env.USE_NODE || exists('package.json') }}
+        run: npm run build
+
+      ### Python ###
+      # إعداد Python
+      - name: إعداد Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      # تثبيت اعتمادات Python
+      - name: تثبيت الاعتماديات (Python)
+        if: ${{ env.USE_PYTHON || exists('requirements.txt') }}
+        run: pip install -r requirements.txt
+      # بناء مشروع Python (حذف أو عدل حسب استخدامك)
+      - name: بناء مشروع Python
+        if: ${{ env.USE_PYTHON || exists('requirements.txt') }}
+        run: python setup.py build || echo "no build step"
+
+      ### Java ###
+      # إعداد جافا Java
+      - name: إعداد جافا JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      # بناء مشروع Java باستخدام Maven
+      - name: بناء مشروع Java
+        if: ${{ env.USE_JAVA || exists('pom.xml') }}
+        run: mvn install || echo "no build step"
+
+      ### PHP ###
+      # إعداد PHP
+      - name: إعداد PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      # تثبيت اعتمادات PHP باستخدام Composer
+      - name: تثبيت الاعتماديات (PHP)
+        if: ${{ env.USE_PHP || exists('composer.json') }}
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      ### Ruby ###
+      # إعداد Ruby
+      - name: إعداد روبي Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      # تثبيت اعتمادات Ruby
+      - name: تثبيت الاعتماديات (Ruby)
+        if: ${{ env.USE_RUBY || exists('Gemfile') }}
+        run: bundle install
+      # بناء تطبيق Ruby ريلز أو غيره
+      - name: بناء تطبيق Ruby
+        if: ${{ env.USE_RUBY || exists('Gemfile') }}
+        run: bundle exec rake build || echo "no build step"
+
+      ### Go ###
+      # إعداد Go
+      - name: إعداد Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      # تثبيت اعتمادات Go
+      - name: تثبيت الاعتماديات (Go)
+        if: ${{ env.USE_GO || exists('go.mod') }}
+        run: go mod download
+      # بناء مشروع Go
+      - name: بناء مشروع Go
+        if: ${{ env.USE_GO || exists('go.mod') }}
+        run: go build ./...
+
+      ### Cloudflare Wrangler ###
+      # إعداد Wrangler (لنشر Cloudflare)
+      - name: إعداد Wrangler
+        uses: cloudflare/wrangler-action@1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # نشر إلى Cloudflare Pages (عدل مجلد النشر حسب الحاجة)
+      - name: نشر إلى Cloudflare Pages
+        run: npx wrangler pages deploy public --project-name stampcoin-platform
+      # نشر إلى Cloudflare Workers
+      - name: نشر إلى Cloudflare Workers
+        run: npx wrangler deploy --env production
+
+      ### رفع الملفات الناتجة (Artifact) ###
+      - name: رفع ملف البناء (Artifact)
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: |
+            public
+            dist
+            build
+            target
+            vendor
+            .next
+            .output
+            ./bin
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
+
+
+===== FILE: .github/workflows/documentation.yml =====
+name: Documentation and Testing
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  # Test documentation links
+  test-docs:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check documentation links
+        run: |
+          # Install link checker
+          npm install -g markdown-link-check
+
+          # Check links in markdown files
+          find . -name "*.md" -not -path "./node_modules/*" | xargs -I {} markdown-link-check -c .markdown-link-check.json {}
+
+          # Check if index.html exists
+          if [ ! -f "docs/index.html" ]; then
+            echo "Error: docs/index.html not found"
+            exit 1
+          fi
+
+          echo "Documentation checks passed"
+
+  # Build and validate documentation
+  build-docs:
+    runs-on: self-hosted
+    needs: test-docs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build documentation
+        run: |
+          # Create a copy of docs for building
+          mkdir -p build/docs
+          cp -r docs/* build/docs/
+
+          # Add timestamp to the documentation
+          echo "<!-- Built at: $(date) -->" >> build/docs/index.html
+
+          echo "Documentation built successfully"
+
+      - name: Validate built documentation
+        run: |
+          # Check if built files exist
+          if [ ! -f "build/docs/index.html" ]; then
+            echo "Error: build/docs/index.html not found"
+            exit 1
+          fi
+
+          # Check if the HTML is valid
+          if grep -q "<!DOCTYPE html>" build/docs/index.html; then
+            echo "HTML validation passed"
+          else
+            echo "Error: Invalid HTML in documentation"
+            exit 1
+          fi
+
+          echo "Documentation validation passed"
+
+  # Upload documentation as artifact
+  upload-docs:
+    runs-on: self-hosted
+    needs: build-docs
+    steps:
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: build/docs/
+          retention-days: 30
+
+  # Create documentation status
+  create-docs-status:
+    runs-on: self-hosted
+    needs: [test-docs, build-docs, upload-docs]
+    if: always()
+    steps:
+      - name: Create status
+        run: |
+          if [[ "${{ needs.test-docs.result }}" == "success" &&                "${{ needs.build-docs.result }}" == "success" &&                "${{ needs.upload-docs.result }}" == "success" ]]; then
+            status="success"
+            description="Documentation built and validated successfully"
+          else
+            status="failure"
+            description="Documentation build failed"
+          fi
+
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}             -d "{"state":"$status","context":"Documentation","description":"$description"}"
+
+
+===== FILE: .github/workflows/monitoring.yml =====
+name: Monitoring and Scheduled Tasks
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  # Health check
+  health-check:
+    runs-on: self-hosted
+    steps:
+      - name: Check application health
+        run: |
+          echo "Running health check..."
+
+          # Check if the application is running
+          if curl -f http://localhost:8080/ > /dev/null 2>&1; then
+            echo "Application is healthy"
+            status="success"
+            message="Application is healthy"
+          else
+            echo "Application is not responding"
+            status="failure"
+            message="Application is not responding"
+
+            # Attempt to restart the application
+            echo "Attempting to restart application..."
+            # Add your restart command here
+            # Example: systemctl restart stampcoin-platform
+          fi
+
+          # Create status
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}             -d "{"state":"$status","context":"Health Check","description":"$message"}"
+
+  # Security scan
+  security-scan:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Run security scan
+        run: |
+          echo "Running security scan..."
+
+          # Install security tools if not already installed
+          npm install -g npm audit
+
+          # Run security audit
+          npm audit --audit-level moderate
+
+          # Check for exposed secrets
+          echo "Checking for exposed secrets..."
+
+          # Example: Use git-secrets if installed
+          # git-secrets --scan -r .
+
+          echo "Security scan completed"
+
+  # Update dependencies
+  update-dependencies:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Update dependencies
+        run: |
+          echo "Updating dependencies..."
+
+          # Update npm packages
+          npm update
+
+          # Check for outdated packages
+          npm outdated
+
+          # Commit changes if there are updates
+          if git diff --quiet; then
+            echo "No dependency updates found"
+          else
+            echo "Found dependency updates, committing changes..."
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            git add package-lock.json
+            git commit -m "chore: Update dependencies"
+            git push
+            echo "Dependencies updated and pushed"
+          fi
+
+  # Cleanup
+  cleanup:
+    runs-on: self-hosted
+    steps:
+      - name: Clean up Docker images
+        run: |
+          echo "Cleaning up Docker images..."
+
+          # Remove unused Docker images
+          docker image prune -f
+
+          # Remove stopped containers
+          docker container prune -f
+
+          # Remove unused volumes
+          docker volume prune -f
+
+          echo "Cleanup completed"
+
+  # Generate report
+  generate-report:
+    runs-on: self-hosted
+    needs: [health-check, security-scan, update-dependencies, cleanup]
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          echo "Generating monitoring report..."
+
+          # Create a report file
+          REPORT_FILE="monitoring-report-$(date +%Y-%m-%d).md"
+
+          echo "# Monitoring Report - $(date)" > $REPORT_FILE
+          echo "" >> $REPORT_FILE
+          echo "## Job Status" >> $REPORT_FILE
+          echo "- Health Check: ${{ needs.health-check.result }}" >> $REPORT_FILE
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> $REPORT_FILE
+          echo "- Update Dependencies: ${{ needs.update-dependencies.result }}" >> $REPORT_FILE
+          echo "- Cleanup: ${{ needs.cleanup.result }}" >> $REPORT_FILE
+          echo "" >> $REPORT_FILE
+          echo "## System Information" >> $REPORT_FILE
+          echo "- Date: $(date)" >> $REPORT_FILE
+          echo "- Node Version: $(node --version)" >> $REPORT_FILE
+          echo "- NPM Version: $(npm --version)" >> $REPORT_FILE
+          echo "- Docker Version: $(docker --version)" >> $REPORT_FILE
+          echo "" >> $REPORT_FILE
+          echo "## Application Information" >> $REPORT_FILE
+          echo "- Application Status: ${{ needs.health-check.result }}" >> $REPORT_FILE
+          echo "- Memory Usage: $(free -m | awk '/Mem:/ {print $3 "MB used / " $2 "MB total"}')" >> $REPORT_FILE
+          echo "- Disk Usage: $(df -h . | awk '/[0-9]%/{print $5 " used"}')" >> $REPORT_FILE
+
+          # Upload the report as an artifact
+          echo "Uploading report..."
+          echo "$REPORT_FILE" > artifact.txt
+
+          # Create a gist with the report
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"             https://api.github.com/gists             -d '{
+              "description": "Monitoring Report - $(date)",
+              "public": true,
+              "files": {
+                "'"$REPORT_FILE"'": {
+                  "content": "$(cat $REPORT_FILE)"
+                }
+              }
+            }'
+
+          echo "Report generated and uploaded successfully"
+
+
+===== FILE: .github/workflows/pages.yml =====
+# Name of the workflow
+name: Deploy to GitHub Pages
+
+# Trigger the workflow on push to the main branch
+on:
+  push:
+    branches: [ main, master ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Set permissions for the workflow
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Build project
+        run: npm run build
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+          # Alternatively, upload only the production-ready build artifacts
+          # path: './dist'
+          
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+===== FILE: .github/workflows/publish.yml =====
+
+name: Publish Project
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: Deploy project
+      run: |
+        # أضف أوامر النشر الخاصة بمشروعك هنا
+        # مثال: rsync -av dist/ /path/to/deployment/
+        echo "Deployment completed successfully"
+
+
+===== FILE: .github/workflows/release.yml =====
+name: Create Release and Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+jobs:
+  # Determine version bump
+  determine-version:
+    runs-on: self-hosted
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release_type: ${{ steps.version.outputs.release_type }}
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          else
+            # Extract version from tag
+            TAG="${{ github.ref }}"
+            RELEASE_TYPE="${TAG#*v}"
+            RELEASE_TYPE="${RELEASE_TYPE%%.*}"
+          fi
+
+          # Get current version from package.json
+          CURRENT_VERSION=$(grep -o '"version": *"[^"]*"' package.json | cut -d'"' -f4)
+
+          # Bump version based on release type
+          if [ "$RELEASE_TYPE" = "major" ]; then
+            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $1+1 ".0.0"}')
+          elif [ "$RELEASE_TYPE" = "minor" ]; then
+            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$2=$2+1; print $1"."$2".0"}')
+          else
+            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$3=$3+1; print $1"."$2"."$3}')
+          fi
+
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+
+  # Create release
+  create-release:
+    runs-on: self-hosted
+    needs: determine-version
+    outputs:
+      upload_url: ${{ steps.create.outputs.upload_url }}
+      release_id: ${{ steps.create.outputs.release_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Update version in package.json
+        run: |
+          sed -i "s/"version": "[^"]*"/"version": "${{ needs.determine-version.outputs.version }}"/" package.json
+          cat package.json
+
+      - name: Commit version change
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: Bump version to ${{ needs.determine-version.outputs.version }}"
+          file_pattern: "package.json"
+
+      - name: Create release
+        id: create
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.determine-version.outputs.version }}
+          release_name: Release v${{ needs.determine-version.outputs.version }}
+          body: |
+            Changes in this Release
+            - Version bump: ${{ needs.determine-version.outputs.release_type }}
+            - Build run: ${{ github.run_id }}
+
+            ## Installation
+
+            \`\`\`bash
+            npm install zedanazad43/stampcoin-platform
+            \`\`\`
+
+            ## Usage
+
+            \`\`\`javascript
+            const app = require('stampcoin-platform');
+            app.listen(8080);
+            \`\`\`
+          draft: false
+          prerelease: false
+
+  # Build and publish Docker image
+  publish-docker:
+    runs-on: self-hosted
+    needs: [determine-version, create-release]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/stampcoin-platform
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value={{version}},enable={{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NODE_VERSION=18
+            VERSION=${{ needs.determine-version.outputs.version }}
+
+      - name: Upload Docker image to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./docker-image.tar
+          asset_name: stampcoin-platform-${{ needs.determine-version.outputs.version }}.tar
+          asset_content_type: application/octet-stream
+
+  # Deploy to production
+  deploy:
+    runs-on: self-hosted
+    needs: [create-release, publish-docker]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to production
+
+        run: |
+          echo "Deploying version ${{ needs.determine-version.version }} to production"
+
+          # Add your deployment commands here
+          # Example:
+          # ssh user@server "docker pull ghcr.io/zedanazad43/stampcoin-platform:latest && docker stop stampcoin-platform || true && docker run -d --name stampcoin-platform -p 8080:8080 ghcr.io/zedanazad43/stampcoin-platform:latest"
+
+          echo "Deployment completed successfully"
+
+      - name: Create deployment status
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}             -d "{"state":"success","context":"Production Deployment","description":"Production deployment completed successfully"}"
+
+
+===== FILE: .github/workflows/self-hosted-ci.yml =====
+
+
+
+===== FILE: build-and-push.yml =====
+- name: Build and push Docker image
+  uses: docker/build-push-action@v4
+  with:
+    context: .
+    push: true
+    tags: ghcr.io/${{ github.repository }}:latest
+            - name: Close Stale Issues
+  uses: actions/stale@v10.1.1
+  with:
+    # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # optional, default is ${{ github.token }}
+    # The message to post on the issue when tagging it. If none provided, will not mark issues stale.
+    stale-issue-message: # optional
+    # The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.
+    stale-pr-message: # optional
+    # The message to post on the issue when closing it. If none provided, will not comment when closing an issue.
+    close-issue-message: # optional
+    # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
+    close-pr-message: # optional
+    # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+    days-before-stale: # optional, default is 60
+    # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
+    days-before-issue-stale: # optional
+    # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+    days-before-pr-stale: # optional
+    # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+    days-before-close: # optional, default is 7
+    # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
+    days-before-issue-close: # optional
+    # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
+    days-before-pr-close: # optional
+    # The label to apply when an issue is stale.
+    stale-issue-label: # optional, default is Stale
+    # The label to apply when an issue is closed.
+    close-issue-label: # optional
+    # The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-issue-labels: # optional, default is 
+    # The reason to use when closing an issue.
+    close-issue-reason: # optional, default is not_planned
+    # The label to apply when a pull request is stale.
+    stale-pr-label: # optional, default is Stale
+    # The label to apply when a pull request is closed.
+    close-pr-label: # optional
+    # The labels that mean a pull request is exempt from being marked as stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-pr-labels: # optional, default is 
+    # The milestones that mean an issue or a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2").
+    exempt-milestones: # optional, default is 
+    # The milestones that mean an issue is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issues.
+    exempt-issue-milestones: # optional, default is 
+    # The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.
+    exempt-pr-milestones: # optional, default is 
+    # Exempt all issues and pull requests with milestones from being marked as stale. Default to false.
+    exempt-all-milestones: # optional, default is false
+    # Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.
+    exempt-all-issue-milestones: # optional, default is 
+    # Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.
+    exempt-all-pr-milestones: # optional, default is 
+    # Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    only-labels: # optional, default is 
+    # Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    any-of-labels: # optional, default is 
+    # Only issues with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the issues.
+    any-of-issue-labels: # optional, default is 
+    # Only pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the pull requests.
+    any-of-pr-labels: # optional, default is 
+    # Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.
+    only-issue-labels: # optional, default is 
+    # Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.
+    only-pr-labels: # optional, default is 
+    # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
+    operations-per-run: # optional, default is 30
+    # Remove stale labels from issues and pull requests when they are updated or commented on.
+    remove-stale-when-updated: # optional, default is true
+    # Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.
+    remove-issue-stale-when-updated: # optional, default is 
+    # Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.
+    remove-pr-stale-when-updated: # optional, default is 
+    # Run the processor in debug mode without actually performing any operations on live issues.
+    debug-only: # optional, default is false
+    # The order to get issues or pull requests. Defaults to false, which is descending.
+    ascending: # optional, default is false
+    # What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.
+    sort-by: # optional, default is created
+    # Delete the git branch after closing a stale pull request.
+    delete-branch: # optional, default is false
+    # The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).
+    start-date: # optional, default is 
+    # The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").
+    exempt-assignees: # optional, default is 
+    # The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.
+    exempt-issue-assignees: # optional, default is 
+    # The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.
+    exempt-pr-assignees: # optional, default is 
+    # Exempt all issues and pull requests with assignees from being marked as stale. Default to false.
+    exempt-all-assignees: # optional, default is false
+    # Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.
+    exempt-all-issue-assignees: # optional, default is 
+    # Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.
+    exempt-all-pr-assignees: # optional, default is 
+    # Exempt draft pull requests from being marked as stale. Default to false.
+    exempt-draft-pr: # optional, default is false
+    # Display some statistics at the end regarding the stale workflow (only when the logs are enabled).
+    enable-statistics: # optional, default is true
+    # A comma delimited list of labels to add when an issue or pull request becomes unstale.
+    labels-to-add-when-unstale: # optional, default is 
+    # A comma delimited list of labels to remove when an issue or pull request becomes stale.
+    labels-to-remove-when-stale: # optional, default is 
+    # A comma delimited list of labels to remove when an issue or pull request becomes unstale.
+    labels-to-remove-when-unstale: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the issues and pull requests.
+    ignore-updates: # optional, default is false
+    # Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.
+    ignore-issue-updates: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.
+    ignore-pr-updates: # optional, default is 
+    # Only the issues or the pull requests with an assignee will be marked as stale automatically.
+    include-only-assigned: # optional, default is false
+    # Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.
+    only-issue-types: # optional, default is 
+          
+
+
+===== FILE: cipaython.yml =====
+- name: Setup Python
+  uses: actions/setup-python@v6.2.0
+- name: Setup Node.js environment
+  uses: actions/setup-node@v6.2.0
+
+
+===== FILE: codeql.yml =====
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  analyze:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+          queries: security-extended
+          # Explicitly include paths if needed (optional)
+          # paths: |
+          #   client/src
+          #   server
+          #   he.js
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        # Add custom build steps if needed for he.js
+        # run: |
+        #   npm run build
+        #   # Any additional steps to process he.js
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+
+===== FILE: config.yml =====
+[submodule "stampcoin-platform"]
+    path = stampcoin-platform
+    url = <stp>
+
+
+===== FILE: docker-compose.yml =====
+version: '3.8'
+
+services:
+  stampcoin-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stampcoin-platform
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  logs:
+    driver: local
+
+
+===== FILE: github_workflows_codeql-normalize-and-upload.yml =====
+# Minimal job to normalize SARIF produced by codeql-action/analyze and upload it.
+# Add these steps after the analyze step in your existing CodeQL workflow (or use as a separate job that runs after analyze).
+on: workflow_run
+jobs:
+  normalize-and-upload:
+    runs-on: ubuntu-latest
+    needs: [codeql-analysis] # update to the job name that runs CodeQL analyze
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch SARIF artifact (if analyze stored it in workspace)
+        # If your analyze step outputs the SARIF to the workspace, skip this.
+        # Otherwise, download or copy the SARIF to ./results/javascript.sarif
+        run: |
+          mkdir -p results
+          # adjust path if CodeQL wrote to a different location:
+          # cp /home/runner/work/Stampcoin-platform/results/javascript.sarif results/javascript.sarif || true
+
+      - name: Normalize SARIF paths
+        run: |
+          INPUT=results/javascript.sarif
+          OUTPUT=results/javascript.fixed.sarif
+          jq 'def normalize_string:(gsub("\\\\+"; "/")|sub("^[A-Za-z]:/"; "")); def fix: if type=="object" then with_entries(.value |= fix) elif type=="array" then map(fix) elif type=="string" then normalize_string else . end; fix' "$INPUT" > "$OUTPUT"
+          echo "Normalized SARIF saved to $OUTPUT"
+
+      - name: Upload normalized SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results/javascript.fixed.sarif
+
+
+===== FILE: merged.yml =====
+merged_bundle: artifacts/merged/extensions/yml.merged.txt
+command: npm run merge:repo
+
+
+===== FILE: pages_fixed.yml =====
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build static site
+        run: |
+          mkdir -p _site
+          # Copy docs files if directory exists
+          if [ -d "docs" ]; then
+            cp docs/* _site/ 2>/dev/null || echo "No files found in docs directory"
+          fi
+          if [ ! -f _site/index.html ]; then
+            echo "Creating index.html..."
+            cat > _site/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stampcoin Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .languages {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Stampcoin Platform</h1>
+        <p class="subtitle">منصة رقمية | Digital Platform | Digitale Plattform</p>
+        
+        <p class="description">
+            An innovative blockchain-based platform for digital stamps, rewards, and loyalty tokens.
+            Secure peer-to-peer transfers and a marketplace for digital collectibles.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>💳 Digital Wallet</h3>
+                <p>Secure storage for your digital stamps and tokens</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Transfers</h3>
+                <p>Blockchain-powered peer-to-peer transactions</p>
+            </div>
+            <div class="feature">
+                <h3>🛍️ Marketplace</h3>
+                <p>Buy, sell, and trade digital collectibles</p>
+            </div>
+            <div class="feature">
+                <h3>👤 User Profiles</h3>
+                <p>Verified accounts with complete profile management</p>
+            </div>
+        </div>
+
+        <a href="https://github.com/zedanazad43/stp" class="cta-button">View on GitHub</a>
+
+        <div class="languages">
+            <p>🇸🇦 العربية • 🇬🇧 English • 🇩🇪 Deutsch</p>
+        </div>
+    </div>
+</body>
+</html>
+EOF
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+===== FILE: pages.yml =====
+name: Build and Deploy to Render
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # السماح بتشغيل يدوي
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Prepare site directory
+      run: |
+        # إنشاء مجلد _site إذا لم يكن موجودًا
+        mkdir -p _site
+
+    - name: Copy docs to _site
+      run: |
+        # استنساخ المستوديع (تم في الخطوة السابقة)
+        echo "Repository already checked out in previous step"
+
+        # نسخ محتويات مجلد docs إلى مجلد _site إذا كان موجودًا
+        if [ -d "docs" ]; then
+          echo "Copying docs to _site..."
+          cp docs/* _site/ 2>/dev/null || echo "No files found in docs directory"
+        else
+          echo "No docs directory found"
+        fi
+
+    - name: Create index.html if missing
+      run: |
+        # إنشاء ملف index.html إذا لم يكن موجودًا في مجلد _site
+        if [ ! -f _site/index.html ]; then
+          echo "Creating index.html..."
+          cat > _site/index.html <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stampcoin Platform</title>
+<style type="text/css">
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+line-height: 1.6;
+}
+</style>
+</head>
+<body>
+<h1>Welcome to the Stampcoin Platform</h1>
+</body>
+</html>
+EOF
+        else
+          echo "index.html already exists"
+        fi
+
+    - name: Build Docker image
+      run: |
+        docker build -t stampcoin-platform .
+
+    - name: Deploy to Render
+      uses: appleboy/render-action@master
+      with:
+        service_id: ${{ secrets.RENDER_SERVICE_ID }}
+        api_key: ${{ secrets.RENDER_API_KEY }}
+        service_name: stampcoin-platform
+        service_type: web
+        env_vars: |
+          NODE_ENV=production
+          PORT=8080
+          HOST=0.0.0.0
+          RENDER_OUTBOUND_IPS="74.220.48.0/24 74.220.56.0/24"
+        dockerfilePath: ./Dockerfile
+        docker_context: .
+        dockerfile: Dockerfile
+        docker_build_command: docker build -t stampcoin-platform .
+        service_region: oregon
+        service_instance_type: starter
+        service_health_check_path: /
+        service_health_check_timeout: 60s
+        logs_url: https://api.render.com/services/$SERVICE_ID/logs
+        on_failure: always
+
+
+===== FILE: stampcoin-platform/.github/workflows/build-and-push2.yml =====
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/stampcoin-platform:latest
+
+
+===== FILE: stampcoin-platform/.github/workflows/deploy.yml =====
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production..."
+        # Add your deployment commands here
+
+
+===== FILE: stampcoin-platform/build-and-push.yml =====
+- name: Build and push Docker image
+  uses: docker/build-push-action@v4
+  with:
+    context: .
+    push: true
+    tags: ghcr.io/${{ github.repository_owner && toLower(github.repository_owner) || github.repository_owner }}/${{ github.repository_name && toLower(github.repository_name) || github.repository_name }}:latest
+
+
+===== FILE: stampcoin-platform/codeql.yml =====
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  analyze:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+          queries: security-extended
+          # Explicitly include paths if needed (optional)
+          # paths: |
+          #   client/src
+          #   server
+          #   he.js
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        # Add custom build steps if needed for he.js
+        # run: |
+        #   npm run build
+        #   # Any additional steps to process he.js
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+
+===== FILE: stampcoin-platform/github_workflows_build-and-push_Version2.yml =====
+# Beispiel-Workflow .github/workflows/build-and-push.yml
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository }}:latest
+
+
+===== FILE: stampcoin-platform/github_workflows_codeql-normalize-and-upload.yml =====
+# Minimal job to normalize SARIF produced by codeql-action/analyze and upload it.
+# Add these steps after the analyze step in your existing CodeQL workflow (or use as a separate job that runs after analyze).
+on: workflow_run
+jobs:
+  normalize-and-upload:
+    runs-on: ubuntu-latest
+    needs: [codeql-analysis] # update to the job name that runs CodeQL analyze
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch SARIF artifact (if analyze stored it in workspace)
+        # If your analyze step outputs the SARIF to the workspace, skip this.
+        # Otherwise, download or copy the SARIF to ./results/javascript.sarif
+        run: |
+          mkdir -p results
+          # adjust path if CodeQL wrote to a different location:
+          # cp /home/runner/work/Stampcoin-platform/results/javascript.sarif results/javascript.sarif || true
+
+      - name: Normalize SARIF paths
+        run: |
+          INPUT=results/javascript.sarif
+          OUTPUT=results/javascript.fixed.sarif
+          jq 'def normalize_string:(gsub("\\\\+"; "/")|sub("^[A-Za-z]:/"; "")); def fix: if type=="object" then with_entries(.value |= fix) elif type=="array" then map(fix) elif type=="string" then normalize_string else . end; fix' "$INPUT" > "$OUTPUT"
+          echo "Normalized SARIF saved to $OUTPUT"
+
+      - name: Upload normalized SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results/javascript.fixed.sarif
+
+
+===== FILE: stampcoin-platform/github_workflows_deploy-pages_Version2.yml =====
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build frontend
+        env:
+          VITE_API_URL: https://stampcoin-platform.fly.dev
+        run: pnpm run build:frontend
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+===== FILE: stampcoin-platform/github_workflows_test-todo-app_Version2.yml =====
+name: Test & Lint Todo App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        working-directory: ./todo-app
+        run: npm ci
+      - name: Run linter
+        working-directory: ./todo-app
+        run: npm run lint
+      - name: Run tests
+        working-directory: ./todo-app
+        run: npm test
+
+
+===== FILE: yml/build-and-push.yml =====
+- name: Build and push Docker image
+  uses: docker/build-push-action@v4
+  with:
+    context: .
+    push: true
+    tags: ghcr.io/${{ github.repository }}:latest
+            - name: Close Stale Issues
+  uses: actions/stale@v10.1.1
+  with:
+    # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # optional, default is ${{ github.token }}
+    # The message to post on the issue when tagging it. If none provided, will not mark issues stale.
+    stale-issue-message: # optional
+    # The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.
+    stale-pr-message: # optional
+    # The message to post on the issue when closing it. If none provided, will not comment when closing an issue.
+    close-issue-message: # optional
+    # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
+    close-pr-message: # optional
+    # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+    days-before-stale: # optional, default is 60
+    # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
+    days-before-issue-stale: # optional
+    # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+    days-before-pr-stale: # optional
+    # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+    days-before-close: # optional, default is 7
+    # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
+    days-before-issue-close: # optional
+    # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
+    days-before-pr-close: # optional
+    # The label to apply when an issue is stale.
+    stale-issue-label: # optional, default is Stale
+    # The label to apply when an issue is closed.
+    close-issue-label: # optional
+    # The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-issue-labels: # optional, default is 
+    # The reason to use when closing an issue.
+    close-issue-reason: # optional, default is not_planned
+    # The label to apply when a pull request is stale.
+    stale-pr-label: # optional, default is Stale
+    # The label to apply when a pull request is closed.
+    close-pr-label: # optional
+    # The labels that mean a pull request is exempt from being marked as stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-pr-labels: # optional, default is 
+    # The milestones that mean an issue or a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2").
+    exempt-milestones: # optional, default is 
+    # The milestones that mean an issue is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issues.
+    exempt-issue-milestones: # optional, default is 
+    # The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.
+    exempt-pr-milestones: # optional, default is 
+    # Exempt all issues and pull requests with milestones from being marked as stale. Default to false.
+    exempt-all-milestones: # optional, default is false
+    # Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.
+    exempt-all-issue-milestones: # optional, default is 
+    # Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.
+    exempt-all-pr-milestones: # optional, default is 
+    # Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    only-labels: # optional, default is 
+    # Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    any-of-labels: # optional, default is 
+    # Only issues with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the issues.
+    any-of-issue-labels: # optional, default is 
+    # Only pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the pull requests.
+    any-of-pr-labels: # optional, default is 
+    # Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.
+    only-issue-labels: # optional, default is 
+    # Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.
+    only-pr-labels: # optional, default is 
+    # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
+    operations-per-run: # optional, default is 30
+    # Remove stale labels from issues and pull requests when they are updated or commented on.
+    remove-stale-when-updated: # optional, default is true
+    # Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.
+    remove-issue-stale-when-updated: # optional, default is 
+    # Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.
+    remove-pr-stale-when-updated: # optional, default is 
+    # Run the processor in debug mode without actually performing any operations on live issues.
+    debug-only: # optional, default is false
+    # The order to get issues or pull requests. Defaults to false, which is descending.
+    ascending: # optional, default is false
+    # What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.
+    sort-by: # optional, default is created
+    # Delete the git branch after closing a stale pull request.
+    delete-branch: # optional, default is false
+    # The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).
+    start-date: # optional, default is 
+    # The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").
+    exempt-assignees: # optional, default is 
+    # The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.
+    exempt-issue-assignees: # optional, default is 
+    # The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.
+    exempt-pr-assignees: # optional, default is 
+    # Exempt all issues and pull requests with assignees from being marked as stale. Default to false.
+    exempt-all-assignees: # optional, default is false
+    # Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.
+    exempt-all-issue-assignees: # optional, default is 
+    # Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.
+    exempt-all-pr-assignees: # optional, default is 
+    # Exempt draft pull requests from being marked as stale. Default to false.
+    exempt-draft-pr: # optional, default is false
+    # Display some statistics at the end regarding the stale workflow (only when the logs are enabled).
+    enable-statistics: # optional, default is true
+    # A comma delimited list of labels to add when an issue or pull request becomes unstale.
+    labels-to-add-when-unstale: # optional, default is 
+    # A comma delimited list of labels to remove when an issue or pull request becomes stale.
+    labels-to-remove-when-stale: # optional, default is 
+    # A comma delimited list of labels to remove when an issue or pull request becomes unstale.
+    labels-to-remove-when-unstale: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the issues and pull requests.
+    ignore-updates: # optional, default is false
+    # Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.
+    ignore-issue-updates: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.
+    ignore-pr-updates: # optional, default is 
+    # Only the issues or the pull requests with an assignee will be marked as stale automatically.
+    include-only-assigned: # optional, default is false
+    # Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.
+    only-issue-types: # optional, default is 
+          
+
+
+===== FILE: yml/codeql.yml =====
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  analyze:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+          queries: security-extended
+          # Explicitly include paths if needed (optional)
+          # paths: |
+          #   client/src
+          #   server
+          #   he.js
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        # Add custom build steps if needed for he.js
+        # run: |
+        #   npm run build
+        #   # Any additional steps to process he.js
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+
+===== FILE: yml/deploy.yml =====
+name: Stampcoin Platform Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Connect to GitHub account
+      run: |
+        echo "Connecting GitHub account to Manu platform"
+        # أمر للربط بين حسابك على manu والحالي على github
+        npm run connect-manu --email=azadzedan13@gmail.com
+
+    - name: Process stamp images to NFTs
+      run: |
+        echo "Processing stamp images to NFTs"
+        # أمر لرفع صور الطوابع من الانترنت وتحويلها إلى NFTs
+        npm run process-stamps --input=./stamps --output=./nfts
+
+    - name: Categorize and archive stamps
+      run: |
+        echo "Categorizing and archiving stamps"
+        # أمر لفرز الطوابع وارشفتها حسب النوع والقيمة
+        npm run categorize-stamps --currency=stp
+
+    - name: Create smart contracts
+      run: |
+        echo "Creating smart contracts for exchange platforms"
+        # أمر لإنشاء العقود الذكية المرتبطة بحساباتك على منصات التداول
+        npm run create-contracts           --metamask=YOUR_METAMASK_WALLET_ADDRESS           --cexio=YOUR_CEXIO_WALLET_ADDRESS           --mexc=YOUR_MEXC_WALLET_ADDRESS           --kukoin=YOUR_KUKOIN_WALLET_ADDRESS
+
+    - name: Generate project token
+      run: |
+        echo "Generating project token with initial offering"
+        # أمر لتوليد عملة الموقع بطرح أولي
+        npm run generate-token           --total-supply=19000000           --initial-price=0.15           --currency=eur
+
+    - name: Publish smart contracts
+      run: |
+        echo "Publishing smart contracts for payment processing"
+        # أمر لنشر العقود الذكية لاستلام المدفوعات
+        npm run publish-contracts
+
+    - name: Setup user interface
+      run: |
+        echo "Setting up professional user interface"
+        # أتفعيل الاشعارات ووضع واجهة احترافية
+        npm run setup-ui           --enable-notifications=true           --show-balance=true           --show-transfer-methods=true
+
+    - name: Create investment plan
+      run: |
+        echo "Creating investment plan for mining and generation"
+        # أمر لإنشاء خطة استثمار
+        npm run create-investment-plan           --mining-reward=0.5           --generation-rate=0.2           --investment-options="short-term,medium-term,long-term"
+
+    - name: Create famous stamps section
+      run: |
+        echo "Creating section for famous stamps and their prices"
+        # أمر لإنشاء قسم للطوابع المشهورة وأسعارها
+        npm run create-famous-stamps-section --database=./stamps-database
+
+    - name: Setup trading system
+      run: |
+        echo "Setting up internal trading system"
+        # أمر لإنشاء نظام التداول الداخلي بالعملة stp
+        npm run setup-trading-system           --currency=stp           --fees=0.02           --min-trade-amount=10
+
+    - name: Setup physical stamps trading
+      run: |
+        echo "Setting up physical stamps trading with guarantees"
+        # أمر لإنشاء نظام تداول الطوابع المادية
+        npm run setup-physical-trading           --escrow-duration=7           --dispute-resolution=true
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production"
+        # أمر لنشر المنصة على الخادم
+        npm run deploy --env=production

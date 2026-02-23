@@ -1,1 +1,25 @@
-{ "name": "stp", "version": "1.0.0", "scripts": { "build": "echo 'Define your build command here - such as tsc, next build, react-scripts build, etc.'", "start": "node server.js" } }
+{
+  "name": "stp",
+  "version": "1.1.0",
+  "description": "Stampcoin Platform",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "start:api": "node main.js",
+    "agent": "node src/ai-agent-expert/index.js",
+    "merge:repo": "node scripts/merge-repository.js",
+    "check:syntax": "node scripts/check-syntax.js"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.1.5",
+    "mongoose": "^7.4.0",
+    "morgan": "^1.10.0"
+  }
+}

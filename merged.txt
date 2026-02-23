@@ -1,19 +1,2 @@
-# دمج جميع الأكواد الفعلية من ملفات TXT
-
-# requirements.txt
-# Python dependencies for Stampcoin Platform
-numpy>=1.21.0
-torch>=1.9.0
-
-# FINAL_DELIVERY_SUMMARY.txt
-# ملخص التسليم النهائي للمشروع
-# ...existing content...
-
-# DEPLOYMENT_QUICK_REFERENCE.txt
-# مرجع سريع لنشر المشروع
-# ...existing content...
-
-# DEPLOYMENT_FINAL_SUMMARY.txt
-# ...existing content...
-
-# ...existing code...
+Merged outputs moved to artifacts/merged/extensions/
+Generate with npm run merge:repo
