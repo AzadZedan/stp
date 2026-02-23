@@ -24,31 +24,42 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build:
+          - parcel
+          - react
+          - vue
+          - tsc
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm install
-        
+
       - name: Build project
-        run: npm run build
-        
+        run: |
+          if [ "${{ matrix.build }}" == "parcel" ]; then npm run build:parcel; fi
+          if [ "${{ matrix.build }}" == "react" ]; then npm run build:react; fi
+          if [ "${{ matrix.build }}" == "vue" ]; then npm run build:vue; fi
+          if [ "${{ matrix.build }}" == "tsc" ]; then npm run build:tsc; fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload only the production-ready build artifacts
           path: './dist'
-          
+
   # Deployment job
   deploy:
     environment:
