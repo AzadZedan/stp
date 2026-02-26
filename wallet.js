@@ -21,65 +21,68 @@ function initializeStorage() {
 }
 
 /**
+ * Read JSON data from a file
+ * @param {string} filePath - Path to the file
+ * @param {*} defaultValue - Value to return if file does not exist
+ * @returns {*} Parsed JSON data or defaultValue
+ */
+function readJsonFile(filePath, defaultValue) {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    // Only return default value if file doesn't exist
+    if (error.code === 'ENOENT') {
+      return defaultValue;
+    }
+    // Re-throw other errors (invalid JSON, permissions, etc.)
+    console.error(`Error reading ${filePath}:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Write JSON data to a file
+ * @param {string} filePath - Path to the file
+ * @param {*} data - Data to serialize and write
+ * @returns {boolean} True on success, false on failure
+ */
+function writeJsonFile(filePath, data) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error(`Error writing ${filePath}:`, error.message);
+    return false;
+  }
+}
+
+/**
  * Read wallets from storage
  */
 function readWallets() {
-  try {
-    const data = fs.readFileSync(WALLETS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    // Only return empty object if file doesn't exist
-    if (error.code === 'ENOENT') {
-      return {};
-    }
-    // Re-throw other errors (invalid JSON, permissions, etc.)
-    console.error('Error reading wallets:', error.message);
-    throw error;
-  }
+  return readJsonFile(WALLETS_FILE, {});
 }
 
 /**
  * Write wallets to storage
  */
 function writeWallets(wallets) {
-  try {
-    fs.writeFileSync(WALLETS_FILE, JSON.stringify(wallets, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Error writing wallets:', error.message);
-    return false;
-  }
+  return writeJsonFile(WALLETS_FILE, wallets);
 }
 
 /**
  * Read transactions from storage
  */
 function readTransactions() {
-  try {
-    const data = fs.readFileSync(TRANSACTIONS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    // Only return empty array if file doesn't exist
-    if (error.code === 'ENOENT') {
-      return [];
-    }
-    // Re-throw other errors (invalid JSON, permissions, etc.)
-    console.error('Error reading transactions:', error.message);
-    throw error;
-  }
+  return readJsonFile(TRANSACTIONS_FILE, []);
 }
 
 /**
  * Write transactions to storage
  */
 function writeTransactions(transactions) {
-  try {
-    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(transactions, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Error writing transactions:', error.message);
-    return false;
-  }
+  return writeJsonFile(TRANSACTIONS_FILE, transactions);
 }
 
 /**
