@@ -5,8 +5,18 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const MARKET_FILE = path.join(__dirname, "market-data.json");
+
+/**
+ * Generate a unique ID with an optional prefix
+ * @param {string} prefix - Optional prefix for the ID
+ * @returns {string} Unique identifier
+ */
+function generateId(prefix) {
+  return prefix ? `${prefix}_${crypto.randomUUID()}` : crypto.randomUUID();
+}
 
 // Initialize market data structure
 let marketData = {
@@ -49,7 +59,7 @@ function addMarketItem(sellerId, item) {
   }
 
   const newItem = {
-    id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    id: generateId("item"),
     sellerId,
     name: item.name,
     description: item.description || "",
@@ -141,7 +151,7 @@ function purchaseMarketItem(itemId, buyerId) {
 
   // Record transaction
   const transaction = {
-    id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    id: generateId("txn"),
     itemId,
     sellerId: item.sellerId,
     buyerId,
